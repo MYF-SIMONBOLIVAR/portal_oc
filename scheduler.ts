@@ -1,5 +1,5 @@
-import { syncSiesaOrders } from "./workers/siesaSyncWorker";
-import { processPendingWhatsAppNotifications } from "./workers/whatsappNotificationWorker";
+import { syncSiesaOrders } from "./siesaSyncWorker";
+import { processPendingWhatsAppNotifications } from "./whatsappNotificationWorker";
 
 /**
  * Scheduler para ejecutar trabajos automáticos
