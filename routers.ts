@@ -1,5 +1,5 @@
 import { COOKIE_NAME } from "./const";
-import { getSessionCookieOptions } from ".//cookies";
+import { getSessionCookieOptions } from "./cookies";
 import { systemRouter } from "./systemRouter";
 import { publicProcedure, router } from "./trpc";
 import { z } from "zod";
