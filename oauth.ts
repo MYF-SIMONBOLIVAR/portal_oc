@@ -1,6 +1,13 @@
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+// 1. Cambiamos @shared por la ruta real (asumiendo que subiste la carpeta shared)
+// Si subiste el archivo const.ts suelto a la raíz, usa: "./const"
+import { COOKIE_NAME, ONE_YEAR_MS } from "./shared/const"; 
+
 import type { Express, Request, Response } from "express";
-import * as db from "../db";
+
+// 2. Quitamos el "../" porque ahora db.ts está en la misma carpeta que oauth.ts
+import * as db from "./db"; 
+
+// 3. Quitamos el "./" extra si estos archivos también están en la raíz
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
 
