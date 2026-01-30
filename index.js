@@ -2,10 +2,12 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { appRouter } from "../routers";
-import { createContext } from "./context";
-import { startScheduler } from "../scheduler";
+
+// AGREGAMOS /server/ A ESTAS RUTAS:
+import { registerOAuthRoutes } from "./server/oauth.ts";
+import { appRouter } from "./server/routers.ts";
+import { createContext } from "./server/context.ts";
+import { startScheduler } from "./server/scheduler.ts";
 
 async function startServer() {
   const app = express();
