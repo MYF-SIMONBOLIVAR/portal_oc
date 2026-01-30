@@ -1,11 +1,15 @@
 import { AXIOS_TIMEOUT_MS, COOKIE_NAME, ONE_YEAR_MS } from "./const";
-import { ForbiddenError } from "@shared/_core/errors";
+// Si no tienes un archivo errors.ts, puedes comentar esta línea o crear el archivo
+// import { ForbiddenError } from "./errors"; 
+
 import axios, { type AxiosInstance } from "axios";
 import { parse as parseCookieHeader } from "cookie";
 import type { Request } from "express";
 import { SignJWT, jwtVerify } from "jose";
-import type { User } from "../../drizzle/schema";
-import * as db from "../db";
+
+// RUTAS APLANADAS: Todo está en la raíz
+import type { User } from "./schema"; 
+import * as db from "./db";
 import { ENV } from "./env";
 import type {
   ExchangeTokenRequest,
