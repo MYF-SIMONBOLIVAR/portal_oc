@@ -3,11 +3,11 @@ import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
-// AGREGAMOS /server/ A ESTAS RUTAS:
-import { registerOAuthRoutes } from "./server/oauth.ts";
-import { appRouter } from "./server/routers.ts";
-import { createContext } from "./server/context.ts";
-import { startScheduler } from "./server/scheduler.ts";
+// QUITA LAS EXTENSIONES .ts
+import { registerOAuthRoutes } from "./server/oauth";
+import { appRouter } from "./server/routers";
+import { createContext } from "./server/context";
+import { startScheduler } from "./server/scheduler";
 
 async function startServer() {
   const app = express();
