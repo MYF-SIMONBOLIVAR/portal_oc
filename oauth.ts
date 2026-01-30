@@ -1,133 +1,53 @@
-import crypto from "crypto";
-import { ENV } from "./_core/env";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import type { Express, Request, Response } from "express";
+import * as db from "../db";
+import { getSessionCookieOptions } from "./cookies";
+import { sdk } from "./sdk";
 
-/**
- * Hash de contraseña usando PBKDF2 (compatible con Node.js estándar)
- * En producción, considera usar bcrypt o argon2
- */
-export function hashPassword(password: string): string {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto
-    .pbkdf2Sync(password, salt, 100000, 64, "sha512")
-    .toString("hex");
-  return `${salt}:${hash}`;
+function getQueryParam(req: Request, key: string): string | undefined {
+  const value = req.query[key];
+  return typeof value === "string" ? value : undefined;
 }
 
-/**
- * Verificar contraseña contra hash almacenado
- */
-export function verifyPassword(password: string, hash: string): boolean {
-  try {
-    const [salt, storedHash] = hash.split(":");
-    const computedHash = crypto
-      .pbkdf2Sync(password, salt, 100000, 64, "sha512")
-      .toString("hex");
-    return computedHash === storedHash;
-  } catch (error) {
-    return false;
-  }
-}
+export function registerOAuthRoutes(app: Express) {
+  app.get("/api/oauth/callback", async (req: Request, res: Response) => {
+    const code = getQueryParam(req, "code");
+    const state = getQueryParam(req, "state");
 
-/**
- * Generar JWT simple para sesión de proveedor
- * En producción, usar una librería como jsonwebtoken
- */
-export function generateProviderToken(providerId: number, nit: string): string {
-  console.log("[Auth] Generando token para providerId:", providerId, "nit:", nit);
-  const payload = {
-    providerId,
-    nit,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 horas
-  };
-
-  // Crear un token simple basado en HMAC
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
-    "base64url"
-  );
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const signature = crypto
-    .createHmac("sha256", ENV.cookieSecret)
-    .update(`${header}.${body}`)
-    .digest("base64url");
-
-  const finalToken = `${header}.${body}.${signature}`;
-  console.log("[Auth] Token generado exitosamente");
-  return finalToken;
-}
-
-/**
- * Verificar y decodificar JWT de proveedor
- */
-export function verifyProviderToken(token: string): { providerId: number; nit: string } | null {
-  try {
-    const [header, body, signature] = token.split(".");
-
-    // Verificar firma
-    const expectedSignature = crypto
-      .createHmac("sha256", ENV.cookieSecret)
-      .update(`${header}.${body}`)
-      .digest("base64url");
-
-    if (signature !== expectedSignature) {
-      return null;
+    if (!code || !state) {
+      res.status(400).json({ error: "code and state are required" });
+      return;
     }
 
-    // Decodificar payload
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString());
+    try {
+      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+      const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
 
-    // Verificar expiración
-    if (payload.exp < Math.floor(Date.now() / 1000)) {
-      return null;
+      if (!userInfo.openId) {
+        res.status(400).json({ error: "openId missing from user info" });
+        return;
+      }
+
+      await db.upsertUser({
+        openId: userInfo.openId,
+        name: userInfo.name || null,
+        email: userInfo.email ?? null,
+        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+        lastSignedIn: new Date(),
+      });
+
+      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
+        name: userInfo.name || "",
+        expiresInMs: ONE_YEAR_MS,
+      });
+
+      const cookieOptions = getSessionCookieOptions(req);
+      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      res.redirect(302, "/");
+    } catch (error) {
+      console.error("[OAuth] Callback failed", error);
+      res.status(500).json({ error: "OAuth callback failed" });
     }
-
-    return {
-      providerId: payload.providerId,
-      nit: payload.nit,
-    };
-  } catch (error) {
-    return null;
-  }
-}
-
-/**
- * Generar código OTP de 6 dígitos para verificación
- */
-export function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-/**
- * Validar formato de NIT colombiano (básico)
- */
-export function isValidNIT(nit: string): boolean {
-  // NIT debe ser numérico y tener entre 5 y 15 caracteres
-  const nitRegex = /^\d{5,15}$/;
-  return nitRegex.test(nit.replace(/[.-]/g, ""));
-}
-
-
-/**
- * Generar token de verificación para registro o reset de contraseña
- * Token válido por 24 horas
- */
-export function generateVerificationToken(): string {
-  return crypto.randomBytes(32).toString("hex");
-}
-
-/**
- * Validar que un token no haya expirado
- */
-export function isTokenExpired(expiresAt: Date): boolean {
-  return new Date() > expiresAt;
-}
-
-
-/**
- * Validar formato de celular colombiano (10 dígitos)
- */
-export function isValidPhoneNumber(phone: string): boolean {
-  // Celular debe ser numérico y tener exactamente 10 dígitos
-  const phoneRegex = /^\d{10}$/;
-  return phoneRegex.test(phone.replace(/[^\d]/g, ""));
+  });
 }
