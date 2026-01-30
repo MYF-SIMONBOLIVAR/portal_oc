@@ -4,7 +4,7 @@ import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
 // QUITA LAS EXTENSIONES .ts
-import { registerOAuthRoutes } from "./server/oauth";
+import { registerOAuthRoutes } from "./server/oauth.js";
 import { appRouter } from "./server/routers";
 import { createContext } from "./server/context";
 import { startScheduler } from "./server/scheduler";
