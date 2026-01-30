@@ -1,7 +1,7 @@
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, providers, purchaseOrders, attachments, confirmations, syncLogs, kpiSnapshots, orderItems, verificationTokens, InsertVerificationToken } from "./schema";
-import { ENV } from './_core/env';
+import { ENV } from './env';
 let _db: ReturnType<typeof drizzle> | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
