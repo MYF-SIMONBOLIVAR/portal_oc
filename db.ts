@@ -1,16 +1,14 @@
-import { eq, and, gte, lte, desc } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, providers, purchaseOrders, attachments, confirmations, syncLogs, kpiSnapshots, orderItems, verificationTokens, InsertVerificationToken } from "./schema";
-import { ENV } from './env';
-let _db: ReturnType<typeof drizzle> | null = null;
+// db.ts
+import mysql from "mysql2/promise"; // Asegúrate de que mysql2 esté en tu package.json
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  if (!_db && ENV.databaseUrl) { // Usamos ENV.databaseUrl que ya definimos en env.ts
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const connection = await mysql.createConnection(ENV.databaseUrl);
+      _db = drizzle(connection, { schema }); // Esto ayuda a Drizzle a entender mejor las tablas
+      console.log("✅ [Database] Conexión exitosa a Hostinger");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.error("❌ [Database] Error de conexión:", error);
       _db = null;
     }
   }
