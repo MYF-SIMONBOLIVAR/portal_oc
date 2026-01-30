@@ -4,16 +4,16 @@ import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
 // 1. Este está perfecto
-import { registerOAuthRoutes } from "./server/oauth.js";
+import { registerOAuthRoutes } from "./server/oauth";
 
 // 2. IMPORTANTE: Aquí también necesitas la extensión .js (o /index.js si es una carpeta )
-import { appRouter } from "./server/routers/index.js"; 
+import { appRouter } from "./server/routers/index"; 
 
 // 3. Añade .js aquí también
-import { createContext } from "./server/context.js";
+import { createContext } from "./server/context";
 
 // 4. Y aquí también
-import { startScheduler } from "./server/scheduler.js";
+import { startScheduler } from "./server/scheduler";
 
 
 async function startServer() {
