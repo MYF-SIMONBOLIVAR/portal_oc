@@ -5,7 +5,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import cors from 'cors';
 
 // RUTAS CORREGIDAS: Como no hay carpeta server, buscamos directo en la raíz
-import { registerOAuthRoutes } from "./oauth";
+import { registerOAuthRoutes } from "./auth";
 import { appRouter } from "./routers"; // Asegúrate de que el archivo se llame routers.ts o js
 import { createContext } from "./context";
 import { startScheduler } from "./scheduler";
