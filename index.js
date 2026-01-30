@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-
+import cors from 'cors';
 // USA LA EXTENSIÓN .ts EXPLÍCITAMENTE
 import { registerOAuthRoutes } from "./server/oauth.ts";
 import { appRouter } from "./server/routers/index.ts"; 
@@ -14,8 +14,7 @@ import { startScheduler } from "./server/scheduler.ts";
 async function startServer() {
   const app = express();
   const server = createServer(app);
-
-  import cors from 'cors';
+  
   app.use(cors({
   origin: 'https://support.repuestossimonbolivar.com'
 } ));
