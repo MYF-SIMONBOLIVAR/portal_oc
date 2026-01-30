@@ -3,11 +3,18 @@ import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
-// QUITA LAS EXTENSIONES .ts
+// 1. Este está perfecto
 import { registerOAuthRoutes } from "./server/oauth.js";
-import { appRouter } from "./server/routers";
-import { createContext } from "./server/context";
-import { startScheduler } from "./server/scheduler";
+
+// 2. IMPORTANTE: Aquí también necesitas la extensión .js (o /index.js si es una carpeta )
+import { appRouter } from "./server/routers/index.js"; 
+
+// 3. Añade .js aquí también
+import { createContext } from "./server/context.js";
+
+// 4. Y aquí también
+import { startScheduler } from "./server/scheduler.js";
+
 
 async function startServer() {
   const app = express();
