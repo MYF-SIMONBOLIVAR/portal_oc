@@ -1,6 +1,10 @@
-import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from '@shared/const';
+// 1. Cambiamos @shared por la ruta directa a la raíz
+import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from "./const";
+
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+
+// 2. Quitamos el ./ porque context ya está en la raíz junto a este archivo
 import type { TrpcContext } from "./context";
 
 const t = initTRPC.context<TrpcContext>().create({
@@ -10,16 +14,16 @@ const t = initTRPC.context<TrpcContext>().create({
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-const requireUser = t.middleware(async opts => {
-  const { ctx, next } = opts;
-
+// Middleware para verificar si el usuario está logueado
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: UNAUTHED_ERR_MSG,
+    });
   }
-
   return next({
     ctx: {
-      ...ctx,
       user: ctx.user,
     },
   });
