@@ -1,5 +1,5 @@
 import { fetchSiesaOrders, mapSiesaOrderToDb, SiesaOrderItem } from "./siesa";
-import { getDb } from "../db";
+import { getDb } from "./db";
 import { purchaseOrders, providers, syncLogs, orderItems } from "./schema";
 import { eq, desc, and } from "drizzle-orm";
 
