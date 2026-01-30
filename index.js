@@ -4,17 +4,16 @@ import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import cors from 'cors';
 
-// QUITAMOS las extensiones .ts para que tsx las resuelva solo
-import { registerOAuthRoutes } from "./server/oauth";
-import { appRouter } from "./server/routers/index"; 
-import { createContext } from "./server/context";
-import { startScheduler } from "./server/scheduler";
+// RUTAS CORREGIDAS: Como no hay carpeta server, buscamos directo en la raíz
+import { registerOAuthRoutes } from "./oauth";
+import { appRouter } from "./routers"; // Asegúrate de que el archivo se llame routers.ts o js
+import { createContext } from "./context";
+import { startScheduler } from "./scheduler";
 
 async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // Configuración de CORS para que Hostinger pueda hablar con Render
   app.use(cors({
     origin: process.env.ALLOWED_ORIGINS || "*",
     credentials: true
@@ -26,12 +25,12 @@ async function startServer() {
   registerOAuthRoutes(app);
   app.use("/api/trpc", createExpressMiddleware({ router: appRouter, createContext }));
 
-  // SALVAVIDAS PARA RENDER: Evitamos que busque Vite en producción
+  // SALVAVIDAS PARA RENDER
   if (process.env.NODE_ENV === "development") {
-    const { setupVite } = await import("./server/vite");
+    // Si llegaras a subir vite.ts a la raíz, esto lo buscaría ahí
+    const { setupVite } = await import("./vite"); 
     await setupVite(app, server);
   } else {
-    // En Render simplemente no hacemos nada con Vite
     console.log("Modo producción detectado: Ignorando Vite...");
   }
 
