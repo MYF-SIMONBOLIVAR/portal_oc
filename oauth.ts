@@ -1,6 +1,6 @@
 // 1. Cambiamos @shared por la ruta real (asumiendo que subiste la carpeta shared)
 // Si subiste el archivo const.ts suelto a la raíz, usa: "./const"
-import { COOKIE_NAME, ONE_YEAR_MS } from "./shared/const"; 
+import { COOKIE_NAME, ONE_YEAR_MS } from "./const"; 
 
 import type { Express, Request, Response } from "express";
 
