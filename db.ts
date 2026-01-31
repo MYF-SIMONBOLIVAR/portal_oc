@@ -1,12 +1,18 @@
 // db.ts
-import mysql from "mysql2/promise"; // Asegúrate de que mysql2 esté en tu package.json
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
+import * as schema from "./schema";
+import { ENV } from "./env";
+
+// ESTA LÍNEA ES LA QUE FALTA:
+let _db: any = null; 
 
 export async function getDb() {
-  if (!_db && ENV.databaseUrl) { // Usamos ENV.databaseUrl que ya definimos en env.ts
+  if (!_db && ENV.databaseUrl) {
     try {
       const connection = await mysql.createConnection(ENV.databaseUrl);
-      _db = drizzle(connection, { schema }); // Esto ayuda a Drizzle a entender mejor las tablas
-      console.log("✅ [Database] Conexión exitosa a Hostinger");
+      _db = drizzle(connection, { schema });
+      console.log("✅ [Database] Conexión exitosa");
     } catch (error) {
       console.error("❌ [Database] Error de conexión:", error);
       _db = null;
