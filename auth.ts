@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { ENV } from "./_core/env";
+import { ENV } from "./env";
 
 /**
  * Hash de contraseña usando PBKDF2 (compatible con Node.js estándar)
