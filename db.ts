@@ -8,7 +8,7 @@ import { ENV } from "./env";
 let _db: any = null; 
 
 export async function getDb() {
-  if (!_db && ENV.databaseUrl) {
+  if (!_db && process.env.DATABASE_URL) {
     try {
       const connection = await mysql.createConnection(ENV.databaseUrl);
       _db = drizzle(connection, { schema });
