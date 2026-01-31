@@ -11,7 +11,7 @@ export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
       const connection = await mysql.createConnection(ENV.databaseUrl);
-      _db = drizzle(connection, { schema });
+      _db = drizzle(connection, { schema, mode: "default" });
       console.log("✅ [Database] Conexión exitosa");
     } catch (error) {
       console.error("❌ [Database] Error de conexión:", error);
