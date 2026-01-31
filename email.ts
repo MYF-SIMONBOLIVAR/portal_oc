@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { ENV } from "./_core/env";
+import { ENV } from "./env";
 
 /**
  * Crea un transportador de correo configurado con Gmail SMTP
