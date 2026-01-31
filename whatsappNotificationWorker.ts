@@ -1,7 +1,7 @@
-import { getDb } from "../db";
-import { purchaseOrders, providers } from "../../drizzle/schema";
+import { getDb } from "./db";
+import { purchaseOrders, providers } from "./schema";
 import { eq } from "drizzle-orm";
-import { sendWhatsAppNotification, formatOrderNumber } from "../whatsapp";
+import { sendWhatsAppNotification, formatOrderNumber } from "./whatsapp";
 
 /**
  * Procesa todas las órdenes que aún no han sido notificadas por WhatsApp.
@@ -76,3 +76,4 @@ export async function processPendingWhatsAppNotifications() {
     console.error("[WhatsAppWorker] Error crítico en el proceso de notificaciones:", error);
   }
 }
+
