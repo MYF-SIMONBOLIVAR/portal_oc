@@ -32,19 +32,19 @@ export function verifyPassword(password: string, hash: string): boolean {
  * Generar JWT simple para sesión de proveedor
  * En producción, usar una librería como jsonwebtoken
  */
-export function generateProviderToken(providerId: number, nit: string): string {
-  console.log("[Auth] Generando token para providerId:", providerId, "nit:", nit);
+export function generateProviderToken(providerId: number, nit: string, role: string): string {
+  console.log("[Auth] Generando token para providerId:", providerId, "nit:", nit, "role:", role);
+  
   const payload = {
     providerId,
     nit,
+    role, // <--- AHORA EL TOKEN SABRÁ QUE ERES ADMIN
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 horas
   };
 
-  // Crear un token simple basado en HMAC
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
-    "base64url"
-  );
+  // Crear un token basado en HMAC (Igual que antes)
+  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = crypto
     .createHmac("sha256", ENV.cookieSecret)
@@ -52,7 +52,7 @@ export function generateProviderToken(providerId: number, nit: string): string {
     .digest("base64url");
 
   const finalToken = `${header}.${body}.${signature}`;
-  console.log("[Auth] Token generado exitosamente");
+  console.log("[Auth] Token generado con rol exitosamente");
   return finalToken;
 }
 
