@@ -203,7 +203,8 @@ export const appRouter = router({
           throw new Error("Contrasena incorrecta");
         }
 
-        const token = generateProviderToken(provider.id, provider.nit);
+       
+        const token = generateProviderToken(provider.id, provider.nit, provider.role); 
         return {
           success: true,
           token,
@@ -212,6 +213,7 @@ export const appRouter = router({
             nit: provider.nit,
             razonSocial: provider.razonSocial,
             email: provider.email,
+            role: provider.role,
           },
         };
       }),
