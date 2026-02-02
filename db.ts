@@ -1,60 +1,64 @@
-// db.ts
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import * as schema from "./schema";
 import { ENV } from "./env";
+import { eq, desc, and, gte, lte } from "drizzle-orm"; // Asegúrate de importar estos helpers
 
-// ESTA LÍNEA ES LA QUE FALTA:
-let _db: any = null; 
+// Definición de tipos basada en tu esquema (ajustar si es necesario)
+import { users, providers, purchaseOrders, attachments, orderItems, confirmations, syncLogs, kpiSnapshots, verificationTokens } from "./schema";
+
+let _pool: mysql.Pool | null = null;
+let _db: any = null;
 
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  if (!_db) {
+    if (!ENV.databaseUrl) {
+      throw new Error("DATABASE_URL no configurada en las variables de entorno");
+    }
+
     try {
-      const connection = await mysql.createConnection(ENV.databaseUrl);
-      _db = drizzle(connection, { schema, mode: "default" });
-      console.log("✅ [Database] Conexión exitosa");
+      // Creamos un Pool en lugar de una conexión única para manejar reconexiones automáticas
+      _pool = mysql.createPool({
+        uri: ENV.databaseUrl,
+        waitForConnections: true,
+        connectionLimit: 10, // Máximo de conexiones simultáneas
+        queueLimit: 0,
+        enableKeepAlive: true, // Mantiene la conexión activa con Hostinger
+        keepAliveInitialDelay: 10000, // Envía señal cada 10 seg
+      });
+
+      _db = drizzle(_pool, { schema, mode: "default" });
+      console.log("✅ [Database] Pool de conexiones establecido exitosamente");
     } catch (error) {
-      console.error("❌ [Database] Error de conexión:", error);
+      console.error("❌ [Database] Error al crear el Pool:", error);
       _db = null;
     }
   }
   return _db;
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
+export async function upsertUser(user: any): Promise<void> {
+  if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
-  }
+  if (!db) return;
 
   try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
+    const values: any = { openId: user.openId };
     const updateSet: Record<string, unknown> = {};
-
     const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
 
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
+    textFields.forEach(field => {
+      if (user[field] !== undefined) {
+        values[field] = user[field] ?? null;
+        updateSet[field] = user[field] ?? null;
+      }
+    });
 
     if (user.lastSignedIn !== undefined) {
       values.lastSignedIn = user.lastSignedIn;
       updateSet.lastSignedIn = user.lastSignedIn;
     }
+    
     if (user.role !== undefined) {
       values.role = user.role;
       updateSet.role = user.role;
@@ -63,17 +67,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.role = 'admin';
     }
 
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
+    if (!values.lastSignedIn) values.lastSignedIn = new Date();
+    if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
 
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
+    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
