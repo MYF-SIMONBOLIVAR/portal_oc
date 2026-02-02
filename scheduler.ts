@@ -45,31 +45,35 @@ async function executeSyncJob() {
   isRunning = true;
   const jobStartTime = new Date();
 
-  console.log(`[Scheduler] --- Iniciando Ciclo de Trabajo en ${jobStartTime.toISOString()} ---`);
-
-  // --- EJECUCIÓN EN PARALELO O PROTEGIDA ---
-  
-  // 1. Intentar Siesa (con su propio try/catch para que no mate al resto)
   try {
-    console.log("[Scheduler] Ejecutando Paso A: Sincronización Siesa...");
-    const result: any = await syncSiesaOrders();
-    console.log(`[Scheduler] ✓ Paso A Finalizado`);
-  } catch (e) {
-    console.error("[Scheduler] ✗ Falló Paso A (Siesa):", e);
-  }
+    console.log(`[Scheduler] --- Iniciando Ciclo de Trabajo en ${jobStartTime.toISOString()} ---`);
 
-  // 2. Intentar WhatsApp (SIEMPRE se ejecuta, aunque Siesa falle o tarde)
-  try {
-    console.log("[Scheduler] Ejecutando Paso B y C: Procesando WhatsApps pendientes...");
-    await processPendingWhatsAppNotifications();
-    console.log(`[Scheduler] ✓ Paso B/C Finalizado`);
-  } catch (e) {
-    console.error("[Scheduler] ✗ Falló Paso B (WhatsApp):", e);
-  }
+    // --- PASO A: Siesa (Aislado) ---
+    try {
+      console.log("[Scheduler] Ejecutando Paso A: Sincronización Siesa...");
+      // Le damos un tiempo límite o simplemente lo ejecutamos
+      await syncSiesaOrders();
+      console.log("[Scheduler] ✓ Paso A completado");
+    } catch (error) {
+      console.error("[Scheduler] ✗ Error en Paso A (Siesa):", error);
+    }
 
-  isRunning = false;
-  const duration = new Date().getTime() - jobStartTime.getTime();
-  console.log(`[Scheduler] --- Ciclo finalizado en ${duration}ms ---`);
+    // --- PASO B y C: WhatsApp (Aislado) ---
+    try {
+      console.log("[Scheduler] Ejecutando Paso B y C: Procesando WhatsApps pendientes...");
+      await processPendingWhatsAppNotifications();
+      console.log("[Scheduler] ✓ Paso B y C completados");
+    } catch (error) {
+      console.error("[Scheduler] ✗ Error en Paso B/C (WhatsApp):", error);
+    }
+
+  } catch (error) {
+    console.error("[Scheduler] Error crítico general en el ciclo:", error);
+  } finally {
+    isRunning = false;
+    const duration = new Date().getTime() - jobStartTime.getTime();
+    console.log(`[Scheduler] --- Ciclo finalizado en ${duration}ms ---`);
+  }
 }
 /**
  * Obtener estado del scheduler
