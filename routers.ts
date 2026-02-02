@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "./const";
 import { getSessionCookieOptions } from "./cookies";
 import { systemRouter } from "./systemRouter";
-import { publicProcedure, router } from "./trpc";
+import { publicProcedure, router } from "./trpc-server";
 import { z } from "zod";
 import { hashPassword, verifyPassword, generateProviderToken, isValidNIT, generateVerificationToken, isTokenExpired, isValidPhoneNumber } from "./auth";
 import { sendVerificationEmail } from "./email";
