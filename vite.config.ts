@@ -1,14 +1,22 @@
+import { defineConfig } from "vite"; // 👈 ESTA ES LA LÍNEA QUE FALTA
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { fileURLToPath } from "url";
+import tailwindcss from "@tailwindcss/vite";
+
+// SOLUCIÓN PARA EL ERROR: Recreamos __dirname para ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // Añadimos esto para asegurar que busque desde la raíz del repo
   base: "/", 
   resolve: {
     alias: {
-      // Usamos path.join para mayor seguridad en Linux (Render)
       "@": path.join(__dirname, "src"),
     },
   },
-  root: __dirname, // Cambiamos "." por __dirname para que sea exacto
+  root: __dirname, 
   build: {
     outDir: "dist",
     emptyOutDir: true,
