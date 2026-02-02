@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "./button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
+import { Input } from "./input";
+import { Label } from "./label";
 import { AlertCircle, Plus, Trash2, Edit2, Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { trpc } from "@/lib/trpc";
-import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "./alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./dialog";
+import { trpc } from "./trpc";
+import { Badge } from "./badge";
 
 export default function AdminUsers() {
   const [isOpen, setIsOpen] = useState(false);
