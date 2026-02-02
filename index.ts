@@ -4,10 +4,10 @@ import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 // 1. Antes "../routers", ahora entramos a la carpeta server
-import { appRouter } from "./server/routers"; 
+import { appRouter } from "./routers"; 
 import { createContext } from "./context";
 // 2. Antes "../scheduler", ahora entramos a la carpeta server
-import { startScheduler } from "./server/scheduler"; 
+import { startScheduler } from "./scheduler"; 
 
 async function startServer() {
   const app = express();
@@ -31,10 +31,10 @@ async function startServer() {
    * 3. Ajustamos las rutas de importación de './vite' a './server/_core/vite'
    */
   if (process.env.NODE_ENV === "development") {
-    const { setupVite } = await import("./server/_core/vite");
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
-    const { serveStatic } = await import("./server/_core/vite");
+    const { serveStatic } = await import("./vite");
     serveStatic(app);
   }
 
