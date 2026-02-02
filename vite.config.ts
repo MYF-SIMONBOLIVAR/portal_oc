@@ -11,11 +11,10 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@db": path.resolve(__dirname, "./db"),
-    },
+  alias: {
+    "@": path.resolve(__dirname, "./src"), // Solo un "./src"
   },
+},
   // Importante para Render: asegurar que el root sea la raíz del proyecto
   root: ".", 
   build: {
