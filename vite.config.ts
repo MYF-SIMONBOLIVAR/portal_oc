@@ -1,15 +1,15 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
-export default defineConfig({
-  plugins: [react()],
+// ESTO DEFINE EL EQUIVALENTE A __DIRNAME EN ES MODULES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+export default {
+  // ... resto de tu configuración
   resolve: {
     alias: {
-      // MAPEAREMOS EL ARCHIVO DE LA RAÍZ PARA QUE PAREZCA QUE ESTÁ EN /LIB
-      "@/lib/utils": path.resolve(__dirname, "./utils.ts"),
-      "@": path.resolve(__dirname, "./"),
+      "@": resolve(__dirname, "./src"),
     },
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json']
-  }
-});
+  },
+};
