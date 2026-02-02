@@ -6,9 +6,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      // Esto le dice a Vite: "Cuando veas @, busca en la carpeta raíz"
+      // Forzamos la ruta exacta al archivo utils
+      "@/lib/utils": path.resolve(__dirname, "./lib/utils.ts"), 
       "@": path.resolve(__dirname, "./"),
     },
+    // Esto ayuda a Vite a probar extensiones si no las pones
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
   },
   build: {
     outDir: 'dist',
