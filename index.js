@@ -17,10 +17,16 @@ async function startServer() {
   const server = createServer(app);
 
   // Configuración de CORS
-  app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS || "*",
-    credentials: true
-  }));
+  // CORRECCIÓN:
+app.use(cors({
+  origin: [
+    "https://support.repuestossimonbolivar.com",
+    "https://portal-oc.onrender.com"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
