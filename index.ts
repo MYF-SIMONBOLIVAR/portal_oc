@@ -3,22 +3,21 @@ import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
-import { appRouter } from "../routers";
+// 1. Antes "../routers", ahora entramos a la carpeta server
+import { appRouter } from "./server/routers"; 
 import { createContext } from "./context";
-import { startScheduler } from "../scheduler";
+// 2. Antes "../scheduler", ahora entramos a la carpeta server
+import { startScheduler } from "./server/scheduler"; 
 
 async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // Configuración de límites para subida de archivos
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-  // Rutas de OAuth
   registerOAuthRoutes(app);
 
-  // API tRPC
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -29,39 +28,30 @@ async function startServer() {
 
   /**
    * MANEJO DINÁMICO DE VITE
-   * Evita que Render busque la librería 'vite' en producción.
+   * 3. Ajustamos las rutas de importación de './vite' a './server/_core/vite'
    */
   if (process.env.NODE_ENV === "development") {
-    const { setupVite } = await import("./vite");
+    const { setupVite } = await import("./server/_core/vite");
     await setupVite(app, server);
   } else {
-    const { serveStatic } = await import("./vite");
+    const { serveStatic } = await import("./server/_core/vite");
     serveStatic(app);
   }
 
-  // Definición del puerto: Prioridad a Render
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
-  // Inicio del servidor UNIFICADO
-  // Usamos "0.0.0.0" para que Render pueda ver el portal de Simón Bolívar
   server.listen(port, "0.0.0.0", () => {
     console.log(`🚀 Servidor listo en puerto ${port}`);
     console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
     
-    // Iniciar scheduler de sincronización Siesa
     startScheduler();
   });
 }
 
-// ARRANQUE DE LA APP
 startServer().catch((err) => {
   console.error("❌ Error al iniciar el servidor:", err);
 });
 
-/**
- * CIERRE SEGURO (Graceful Shutdown)
- * Lo que me pediste para que Render cierre bien los procesos
- */
 process.on("SIGTERM", () => {
   console.log("[Server] SIGTERM recibido, cerrando servidor...");
   process.exit(0);
