@@ -173,6 +173,7 @@ export const appRouter = router({
             id: provider!.id,
             nit: provider!.nit,
             email: provider!.email,
+            role: provider.role,
           },
         };
       }),
