@@ -6,20 +6,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // MAPEAREMOS EL ARCHIVO DE LA RAÍZ PARA QUE PAREZCA QUE ESTÁ EN /LIB
+      "@/lib/utils": path.resolve(__dirname, "./utils.ts"),
       "@": path.resolve(__dirname, "./"),
     },
-    // Esto es lo que falta: le dice a Vite que busque el archivo con estas extensiones
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css']
-  },
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    rollupOptions: {
-      // Evita que el build falle por advertencias menores
-      onwarn(warning, warn) {
-        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
-        warn(warning);
-      },
-    }
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json']
   }
 });
