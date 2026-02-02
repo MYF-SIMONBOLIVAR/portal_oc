@@ -1,24 +1,28 @@
-import { defineConfig } from "vite"; // 👈 ESTA ES LA LÍNEA QUE FALTA
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
 
-// SOLUCIÓN PARA EL ERROR: Recreamos __dirname para ES Modules
+// Recreamos __dirname para compatibilidad con ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "/", 
+  // Forzamos a que Vite sepa que la raíz es donde está este archivo
+  root: __dirname,
+  base: "/",
   resolve: {
     alias: {
-      "@": path.join(__dirname, "src"),
+      // Usamos path.resolve para una ruta absoluta limpia hacia src
+      "@": path.resolve(__dirname, "src"),
     },
   },
-  root: __dirname, 
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    // Ayuda a debugear si hay errores de rutas en los assets
+    assetsDir: "assets",
   },
 });
