@@ -4,10 +4,10 @@ import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 // 1. Apuntamos directamente a los archivos index dentro de las carpetas en la raíz
-import { appRouter } from "./routers/index"; 
+import { appRouter } from "./routers"; 
 import { createContext } from "./context";
 // 2. Apuntamos al scheduler en la raíz
-import { startScheduler } from "./scheduler/index"; 
+import { startScheduler } from "./scheduler";
 
 async function startServer() {
   const app = express();
