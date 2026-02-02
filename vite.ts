@@ -48,24 +48,26 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // AJUSTE CLAVE: En Render, Vite genera la carpeta 'dist' en la raíz
+  // AJUSTE: Vite genera 'dist' en la raíz. 
+  // Al estar este archivo en la raíz, la ruta es directa.
   const distPath = path.resolve(__dirname, "dist");
 
   if (!fs.existsSync(distPath)) {
     console.error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`
+      `❌ Carpeta de build no encontrada en: ${distPath}`
     );
   }
 
+  // Servir archivos estáticos desde /dist
   app.use(express.static(distPath));
 
-  // Si no encuentra el archivo estático, sirve el index.html del build
+  // Cualquier otra ruta debe devolver el index.html de /dist
   app.use("*", (_req, res) => {
     const indexPath = path.resolve(distPath, "index.html");
     if (fs.existsSync(indexPath)) {
       res.sendFile(indexPath);
     } else {
-      res.status(404).send("Frontend build not found. Please check 'dist' folder.");
+      res.status(404).send("Error: No se encontró el index.html en /dist");
     }
   });
 }
