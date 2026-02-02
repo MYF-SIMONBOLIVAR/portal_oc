@@ -1,5 +1,5 @@
 import { Toaster } from "./sonner";
-import { TooltipProvider } from ".tooltip";
+import { TooltipProvider } from "./tooltip";
 import NotFound from "./NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./ErrorBoundary";
