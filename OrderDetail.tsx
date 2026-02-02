@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+import { Button } from "./button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
+import { Badge } from "./badge";
+import { Alert, AlertDescription } from "./alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
+import { Input } from "./input";
 import { ArrowLeft, FileText, Upload, Clock, CheckCircle, AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "./trpc";
 
 export default function OrderDetail() {
   const [, setLocation] = useLocation();
