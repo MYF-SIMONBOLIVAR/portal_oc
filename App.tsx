@@ -3,7 +3,7 @@ import { TooltipProvider } from ".tooltip";
 import NotFound from "./NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import { ThemeProvider } from "./ThemeContext";
 import Home from "./pages/Home";
 import ProviderDashboard from "./ProviderDashboard";
 import OrderDetail from "./OrderDetail";
