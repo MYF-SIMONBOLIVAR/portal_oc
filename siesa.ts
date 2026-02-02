@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ENV } from "./_core/env";
+import { ENV } from "./env";
 
 export interface SiesaOrderItem {
   f420_id_tipo_docto: string;
