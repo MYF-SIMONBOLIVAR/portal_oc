@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "./button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
+import { Input } from "./input";
+import { Label } from "./label";
 import { AlertCircle, Lock, User } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { trpc } from "@/lib/trpc";
+import { Alert, AlertDescription } from "./alert";
+import { trpc } from "./trpc";
 
 export default function Home() {
   const [, setLocation] = useLocation();
