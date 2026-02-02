@@ -1,13 +1,13 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Button } from "./button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
+import { Input } from "./input";
 import { ArrowLeft, TrendingUp, Calendar, Users, DollarSign, AlertCircle, CheckCircle, Clock } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
+import { Badge } from "./badge";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "./trpc";
 
 export default function AdminKPIs() {
   const [, setLocation] = useLocation();
