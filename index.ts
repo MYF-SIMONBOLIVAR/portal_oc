@@ -3,11 +3,11 @@ import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
-// 1. Antes "../routers", ahora entramos a la carpeta server
-import { appRouter } from "./routers"; 
+// 1. Apuntamos directamente a los archivos index dentro de las carpetas en la raíz
+import { appRouter } from "./routers/index"; 
 import { createContext } from "./context";
-// 2. Antes "../scheduler", ahora entramos a la carpeta server
-import { startScheduler } from "./scheduler"; 
+// 2. Apuntamos al scheduler en la raíz
+import { startScheduler } from "./scheduler/index"; 
 
 async function startServer() {
   const app = express();
@@ -28,13 +28,13 @@ async function startServer() {
 
   /**
    * MANEJO DINÁMICO DE VITE
-   * 3. Ajustamos las rutas de importación de './vite' a './server/_core/vite'
+   * Si 'vite.ts' está en la raíz junto a este index.ts, usamos './vite.ts'
    */
   if (process.env.NODE_ENV === "development") {
-    const { setupVite } = await import("./vite");
+    const { setupVite } = await import("./vite.ts");
     await setupVite(app, server);
   } else {
-    const { serveStatic } = await import("./vite");
+    const { serveStatic } = await import("./vite.ts");
     serveStatic(app);
   }
 
