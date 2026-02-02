@@ -45,39 +45,32 @@ async function executeSyncJob() {
   isRunning = true;
   const jobStartTime = new Date();
 
+  console.log(`[Scheduler] --- Iniciando Ciclo de Trabajo en ${jobStartTime.toISOString()} ---`);
+
+  // --- EJECUCIÓN EN PARALELO O PROTEGIDA ---
+  
+  // 1. Intentar Siesa (con su propio try/catch para que no mate al resto)
   try {
-    console.log(`[Scheduler] --- Iniciando Ciclo de Trabajo en ${jobStartTime.toISOString()} ---`);
-
-    // PASO A: Sincronizar con Siesa
     console.log("[Scheduler] Ejecutando Paso A: Sincronización Siesa...");
-    
-    // Forzamos el tipo o manejamos el resultado como 'any' para evitar el bloqueo del compilador
     const result: any = await syncSiesaOrders();
+    console.log(`[Scheduler] ✓ Paso A Finalizado`);
+  } catch (e) {
+    console.error("[Scheduler] ✗ Falló Paso A (Siesa):", e);
+  }
 
-    if (result.success) {
-      console.log(
-        `[Scheduler] ✓ Sincronización Siesa exitosa. ` +
-        `Nuevas: ${result.newOrdersCount}, Actualizadas: ${result.updatedOrdersCount}`
-      );
-    } else {
-      // Usamos un fallback por si result.error es undefined
-      console.error(`[Scheduler] ✗ Sincronización Siesa fallida:`, result.error || "Error desconocido");
-    }
-
-    // PASO B y C: Procesar notificaciones pendientes
+  // 2. Intentar WhatsApp (SIEMPRE se ejecuta, aunque Siesa falle o tarde)
+  try {
     console.log("[Scheduler] Ejecutando Paso B y C: Procesando WhatsApps pendientes...");
     await processPendingWhatsAppNotifications();
-
-  } catch (error) {
-    console.error("[Scheduler] Error crítico durante el ciclo de trabajo:", error);
-  } finally {
-    isRunning = false;
-    const jobEndTime = new Date();
-    const duration = jobEndTime.getTime() - jobStartTime.getTime();
-    console.log(`[Scheduler] --- Ciclo finalizado en ${duration}ms ---`);
+    console.log(`[Scheduler] ✓ Paso B/C Finalizado`);
+  } catch (e) {
+    console.error("[Scheduler] ✗ Falló Paso B (WhatsApp):", e);
   }
-}
 
+  isRunning = false;
+  const duration = new Date().getTime() - jobStartTime.getTime();
+  console.log(`[Scheduler] --- Ciclo finalizado en ${duration}ms ---`);
+}
 /**
  * Obtener estado del scheduler
  */
