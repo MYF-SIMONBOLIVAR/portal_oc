@@ -33,6 +33,7 @@ export const providers = mysqlTable("providers", {
   direccion: varchar("direccion", { length: 255 }),
   passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
   estado: mysqlEnum("estado", ["activo", "inactivo"]).default("activo").notNull(),
+  role: varchar("role", { length: 20 }).default("provider"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
