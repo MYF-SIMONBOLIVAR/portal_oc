@@ -1,7 +1,7 @@
 import { Button } from "./button";
 import { Textarea } from "./textarea";
 import { ScrollArea } from "./scroll-area";
-import { cn } from "@/lib/utils";
+import { cn } from "./utils";
 import { Loader2, Send, User, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Streamdown } from "streamdown";
