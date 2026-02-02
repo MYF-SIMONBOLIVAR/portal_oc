@@ -45,35 +45,34 @@ async function executeSyncJob() {
   isRunning = true;
   const jobStartTime = new Date();
 
-  try {
-    console.log(`[Scheduler] --- Iniciando Ciclo de Trabajo en ${jobStartTime.toISOString()} ---`);
+  console.log(`[Scheduler] --- Iniciando Ciclo de Trabajo en ${jobStartTime.toISOString()} ---`);
 
-    // --- PASO A: Siesa (Aislado) ---
-    try {
-      console.log("[Scheduler] Ejecutando Paso A: Sincronización Siesa...");
-      // Le damos un tiempo límite o simplemente lo ejecutamos
-      await syncSiesaOrders();
-      console.log("[Scheduler] ✓ Paso A completado");
-    } catch (error) {
-      console.error("[Scheduler] ✗ Error en Paso A (Siesa):", error);
-    }
+  // Ejecutamos ambos procesos sin que uno bloquee al otro
+  // Usamos Promise.allSettled para que si uno falla o se demora, el otro siga su curso
+  await Promise.allSettled([
+    (async () => {
+      try {
+        console.log("[Scheduler] Ejecutando Paso A: Sincronización Siesa...");
+        await syncSiesaOrders();
+        console.log("[Scheduler] ✓ Paso A Finalizado");
+      } catch (e) {
+        console.error("[Scheduler] ✗ Error en Paso A:", e);
+      }
+    })(),
+    (async () => {
+      try {
+        console.log("[Scheduler] Ejecutando Paso B y C: Procesando WhatsApps pendientes...");
+        await processPendingWhatsAppNotifications();
+        console.log("[Scheduler] ✓ Paso B/C Finalizado");
+      } catch (e) {
+        console.error("[Scheduler] ✗ Error en Paso B/C:", e);
+      }
+    })()
+  ]);
 
-    // --- PASO B y C: WhatsApp (Aislado) ---
-    try {
-      console.log("[Scheduler] Ejecutando Paso B y C: Procesando WhatsApps pendientes...");
-      await processPendingWhatsAppNotifications();
-      console.log("[Scheduler] ✓ Paso B y C completados");
-    } catch (error) {
-      console.error("[Scheduler] ✗ Error en Paso B/C (WhatsApp):", error);
-    }
-
-  } catch (error) {
-    console.error("[Scheduler] Error crítico general en el ciclo:", error);
-  } finally {
-    isRunning = false;
-    const duration = new Date().getTime() - jobStartTime.getTime();
-    console.log(`[Scheduler] --- Ciclo finalizado en ${duration}ms ---`);
-  }
+  isRunning = false;
+  const duration = new Date().getTime() - jobStartTime.getTime();
+  console.log(`[Scheduler] --- Ciclo finalizado en ${duration}ms ---`);
 }
 /**
  * Obtener estado del scheduler
