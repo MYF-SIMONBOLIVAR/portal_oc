@@ -4,7 +4,7 @@ import NotFound from "./NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./ErrorBoundary";
 import { ThemeProvider } from "./ThemeContext";
-import Home from "./pages/Home";
+import Home from "./Home";
 import ProviderDashboard from "./ProviderDashboard";
 import OrderDetail from "./OrderDetail";
 import AdminDashboard from "./AdminDashboard";
