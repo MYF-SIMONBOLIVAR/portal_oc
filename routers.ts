@@ -5,7 +5,7 @@ import { publicProcedure, router } from "./trpc-server";
 import { z } from "zod";
 import { hashPassword, verifyPassword, generateProviderToken, isValidNIT, generateVerificationToken, isTokenExpired, isValidPhoneNumber } from "./auth";
 import { sendVerificationEmail } from "./email";
-import { sendWhatsAppNotification, formatOrderNumber, sendConfirmationNotification } from "./whatsapp";
+import { sendWhatsAppNotification, formatOrderNumber, sendConfirmationNotification, sendRejectionNotification } from "./whatsapp";
 import {
   getProviderByNit,
   getProviderOrders,
