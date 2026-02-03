@@ -45,7 +45,7 @@ export default function ProviderDashboard() {
     },
   });
 
-  const rejectMutation = trpc.orders.confirm.useMutation({
+  const rejectMutation = trpc.orders.reject.useMutation({
     onSuccess: () => {
       refetch();
     },
