@@ -8,6 +8,9 @@ import { appRouter } from "./routers";
 import { createContext } from "./context";
 // 2. Apuntamos al scheduler en la raíz
 import { startScheduler } from "./scheduler";
+import cookieParser from "cookie-parser";
+// ...
+app.use(cookieParser()); // Esto le pone los lentes al servidor para ver las cookies
 
 async function startServer() {
   const app = express();
