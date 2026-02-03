@@ -59,31 +59,26 @@ export function generateProviderToken(providerId: number, nit: string, role: str
 /**
  * Verificar y decodificar JWT de proveedor
  */
-export function verifyProviderToken(token: string): { providerId: number; nit: string } | null {
+export function verifyProviderToken(token: string): { providerId: number; nit: string; role: string } | null { // <--- Agregamos role al tipo de retorno
   try {
     const [header, body, signature] = token.split(".");
 
-    // Verificar firma
     const expectedSignature = crypto
       .createHmac("sha256", ENV.cookieSecret)
       .update(`${header}.${body}`)
       .digest("base64url");
 
-    if (signature !== expectedSignature) {
-      return null;
-    }
+    if (signature !== expectedSignature) return null;
 
-    // Decodificar payload
     const payload = JSON.parse(Buffer.from(body, "base64url").toString());
 
-    // Verificar expiración
-    if (payload.exp < Math.floor(Date.now() / 1000)) {
-      return null;
-    }
+    if (payload.exp < Math.floor(Date.now() / 1000)) return null;
 
+    // AHORA DEVOLVEMOS EL ROL TAMBIÉN
     return {
       providerId: payload.providerId,
       nit: payload.nit,
+      role: payload.role || "provider", // Si no tiene rol, asumimos que es un proveedor por seguridad
     };
   } catch (error) {
     return null;
