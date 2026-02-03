@@ -1,11 +1,11 @@
 import { getDb } from "./db";
 import { purchaseOrders, providers } from "./schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { sendWhatsAppNotification, formatOrderNumber } from "./whatsapp";
 
 /**
  * Procesa todas las órdenes que aún no han sido notificadas por WhatsApp.
- * Este worker es independiente del origen de la orden (Siesa o Manual).
+ * Implementa un bloqueo preventivo para evitar envíos duplicados.
  */
 export async function processPendingWhatsAppNotifications() {
   try {
@@ -15,7 +15,7 @@ export async function processPendingWhatsAppNotifications() {
       return;
     }
 
-    // PASO B: Buscar órdenes donde notificadoWpp es 0 (pendiente)
+    // PASO 1: Buscar órdenes pendientes (notificadoWpp === 0)
     const pendingOrders = await db
       .select({
         order: purchaseOrders,
@@ -32,44 +32,63 @@ export async function processPendingWhatsAppNotifications() {
 
     console.log(`[WhatsAppWorker] Detectadas ${pendingOrders.length} órdenes para procesar.`);
 
-    // PASO C: Enviar mensaje con bloqueo de seguridad para evitar duplicados
     for (const item of pendingOrders) {
       const { order, provider } = item;
       const ordenNumero = formatOrderNumber(order.tipoDocumento || "FOC", order.consecutivo);
 
-      // --- BLOQUEO DE SEGURIDAD ---
-      // Marcamos la orden como enviada (1) ANTES de llamar a la API.
-      // Si otro proceso corre al mismo tiempo, ya no verá esta orden como pendiente (0).
-      await db
-        .update(purchaseOrders)
-        .set({ 
-          notificadoWpp: 1, 
-          fechaNotificacionWpp: new Date() 
-        })
-        .where(eq(purchaseOrders.id, order.id));
-
-      console.log(`[WhatsAppWorker] Bloqueando orden ${ordenNumero} e iniciando envío a ${provider.celular}...`);
-
-      const success = await sendWhatsAppNotification({
-        numero_telefonico: provider.celular,
-        proveedor: provider.razonSocial,
-        url: "https://repuestossimonbolivar.com/",
-        orden_numero: ordenNumero,
-      } );
-
-      if (success) {
-        console.log(`[WhatsAppWorker] ✓ Notificación enviada exitosamente para la orden ${ordenNumero}.`);
-      } else {
-        // Si el envío falló realmente, revertimos el estado a 0 para que se reintente en el próximo ciclo (10 min)
+      try {
+        // --- PASO 2: BLOQUEO PREVENTIVO ---
+        // Cambiamos a 2 para indicar que está "En proceso de envío"
+        // Esto evita que otro ciclo del scheduler tome la misma orden
         await db
           .update(purchaseOrders)
           .set({ 
-            notificadoWpp: 0, 
-            fechaNotificacionWpp: null 
+            notificadoWpp: 2, 
+            fechaNotificacionWpp: new Date() 
           })
           .where(eq(purchaseOrders.id, order.id));
+
+        console.log(`[WhatsAppWorker] 🛡️ Orden ${ordenNumero} bloqueada preventivamente. Enviando a ${provider.celular}...`);
+
+        // --- PASO 3: LLAMADA A LA API DE WHATSAPP ---
+        const success = await sendWhatsAppNotification({
+          numero_telefonico: provider.celular,
+          proveedor: provider.razonSocial,
+          url: "https://repuestossimonbolivar.com/",
+          orden_numero: ordenNumero,
+        });
+
+        if (success) {
+          // --- PASO 4: ÉXITO TOTAL ---
+          // Marcamos como 1 (Enviado y bloqueado permanentemente)
+          await db
+            .update(purchaseOrders)
+            .set({ notificadoWpp: 1 })
+            .where(eq(purchaseOrders.id, order.id));
+          
+          console.log(`[WhatsAppWorker] ✓ Notificación exitosa para la orden ${ordenNumero}.`);
+        } else {
+          // --- PASO 5: FALLO DE LA API ---
+          // Revertimos a 0 para que se intente de nuevo en el próximo ciclo (5 min)
+          await db
+            .update(purchaseOrders)
+            .set({ 
+              notificadoWpp: 0, 
+              fechaNotificacionWpp: null 
+            })
+            .where(eq(purchaseOrders.id, order.id));
+          
+          console.warn(`[WhatsAppWorker] ✗ La API rechazó el envío de ${ordenNumero}. Se liberó para reintento.`);
+        }
+      } catch (innerError) {
+        // --- PASO 6: ERROR DE RED O CÓDIGO ---
+        console.error(`[WhatsAppWorker] 🚨 Error procesando orden ${ordenNumero}:`, innerError);
         
-        console.warn(`[WhatsAppWorker] ✗ Falló el envío para ${ordenNumero}. Se ha restablecido a pendiente para reintento.`);
+        // Revertimos a 0 por seguridad
+        await db
+          .update(purchaseOrders)
+          .set({ notificadoWpp: 0 })
+          .where(eq(purchaseOrders.id, order.id));
       }
     }
   } catch (error) {
