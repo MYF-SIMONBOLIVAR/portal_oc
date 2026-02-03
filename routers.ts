@@ -185,7 +185,7 @@ export const appRouter = router({
           password: z.string().min(6),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => { // 👈 Agregamos ctx aquí
         if (!isValidNIT(input.nit)) {
           throw new Error("NIT invalido");
         }
@@ -203,8 +203,17 @@ export const appRouter = router({
           throw new Error("Contrasena incorrecta");
         }
 
-       
-        const token = generateProviderToken(provider.id, provider.nit, provider.role); 
+        const token = generateProviderToken(provider.id, provider.nit, provider.role);
+
+        
+        ctx.res.cookie("portal_session", token, {
+          maxAge: 365 * 24 * 60 * 60 * 1000, // 1 año
+          path: "/",
+          httpOnly: true,
+          secure: true,   // Necesario para Render (HTTPS)
+          sameSite: "none",
+        });
+
         return {
           success: true,
           token,
@@ -217,8 +226,6 @@ export const appRouter = router({
           },
         };
       }),
-  }),
-
   attachments: router({
     upload: publicProcedure
       .input(
