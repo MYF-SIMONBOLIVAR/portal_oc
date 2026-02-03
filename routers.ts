@@ -405,6 +405,7 @@ export const appRouter = router({
           await sendRejectionNotification({
             consecutivo: ordenNumero,
             proveedor: provider.razonSocial,
+            url: "http://repuestossimonbolivar.com",
             celular: "3233315933" // Número compras
           });
         } catch (wsError) {
