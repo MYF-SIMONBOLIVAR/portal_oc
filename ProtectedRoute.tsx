@@ -10,10 +10,10 @@ export const ProtectedRoute = ({ component: Component, ...rest }: any) => {
   if (isLoading) return <div>Validando credenciales...</div>;
 
   // Si no hay usuario o el rol NO es admin, lo mandamos al login de inmediato
-  if (!user || user.role !== 'admin') {
-    setLocation("/auth"); // O tu ruta de login
-    return null;
-  }
+  if (error || !user || user.role !== 'admin') {
+  setTimeout(() => setLocation("/"), 0); // Te regresa al login principal
+  return null;
+}
 
   // Si es admin, lo dejamos pasar
   return <Component {...rest} />;
