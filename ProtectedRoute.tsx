@@ -1,20 +1,28 @@
 import { useLocation } from "wouter";
-import { trpc } from "./trpc"; // O donde tengas tu instancia de trpc
+import { trpc } from "./trpc"; 
 
 export const ProtectedRoute = ({ component: Component, ...rest }: any) => {
   const [, setLocation] = useLocation();
   
-  // Consultamos al servidor quién es el usuario actual
-  const { data: user, isLoading } = trpc.auth.me.useQuery();
+  
+  const { data: user, isLoading, error } = trpc.auth.me.useQuery(undefined, {
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  if (isLoading) return <div>Validando credenciales...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-slate-600 animate-pulse">Verificando acceso...</p>
+      </div>
+    );
+  }
 
-  // Si no hay usuario o el rol NO es admin, lo mandamos al login de inmediato
+ 
   if (error || !user || user.role !== 'admin') {
-  setTimeout(() => setLocation("/"), 0); // Te regresa al login principal
-  return null;
-}
+    setTimeout(() => setLocation("/"), 0); 
+    return null;
+  }
 
-  // Si es admin, lo dejamos pasar
   return <Component {...rest} />;
 };
