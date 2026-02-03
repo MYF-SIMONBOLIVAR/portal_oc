@@ -56,7 +56,7 @@ res.cookie(COOKIE_NAME, sessionToken, {
   path: "/",           
   httpOnly: true,      
   secure: true,        
-  sameSite: "lax"      
+  sameSite: "none" 
 });
 
 res.redirect(302, "/");
