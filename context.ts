@@ -1,6 +1,7 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import { verifyProviderToken } from "./auth"; // IMPORTANTE: Trae tu validador
-import { COOKIE_NAME } from "./const"; // Asegúrate de tener el nombre de la cookie
+import { verifyProviderToken } from "./auth";
+import { COOKIE_NAME } from "./const";
+import { sdk } from "./sdk"; // No olvides re-importar tu SDK
 
 export async function createContext(
   opts: CreateExpressContextOptions
@@ -8,26 +9,29 @@ export async function createContext(
   let user: any = null;
 
   try {
-    // 1. El SDK hace la validación base (sesión, expiración)
+    // 1. Intentar autenticar con el SDK
     const sdkUser = await sdk.authenticateRequest(opts.req);
     
-    // 2. Extraemos el rol directamente del token JWT
-    const token = opts.req.cookies?.[COOKIE_NAME] || opts.req.headers.cookie;
-    // Si el token viene en el header plano, podrías necesitar un parser, 
-    // pero si usas cookie-parser, req.cookies es suficiente.
-    
+    // 2. Extraer el token de las cookies de forma segura
+    // Usamos opts.req.cookies (si tienes cookie-parser) o parseamos el header
+    const token = opts.req.cookies?.[COOKIE_NAME];
+
     if (sdkUser && token) {
-      // Usamos tu función de auth.ts para obtener el rol real
-      const decoded = verifyProviderToken(token); 
+      // 3. Decodificar el rol de nuestro JWT personalizado
+      const decoded = verifyProviderToken(token);
       
+      // 4. Fusionar los datos del SDK con el ROL de nuestro token
       user = {
         ...sdkUser,
-        role: decoded?.role || 'provider' // <--- AQUÍ LE DAMOS EL PODER
+        role: decoded?.role || 'provider' 
       };
+      
+      console.log(`[Context] Usuario identificado: ${user.nit} con rol: ${user.role}`);
     } else {
       user = sdkUser;
     }
   } catch (error) {
+    console.error("[Context] Error de autenticación:", error);
     user = null;
   }
 
