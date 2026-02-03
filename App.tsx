@@ -10,6 +10,7 @@ import OrderDetail from "./OrderDetail";
 import AdminDashboard from "./AdminDashboard";
 import AdminKPIs from "./AdminKPIs";
 import AdminUsers from "./AdminUsers";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 function Router() {
   return (
@@ -44,6 +45,33 @@ function App() {
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
+  );
+}
+function Router() {
+  return (
+    <Switch>
+      <Route path={"/"} component={Home} />
+      
+      {/* Rutas de Proveedor (Públicas o podrías protegerlas luego también) */}
+      <Route path={"/provider/dashboard"} component={ProviderDashboard} />
+      <Route path={"/provider/order/:id"} component={OrderDetail} />
+
+      {/* 🔐 Rutas Protegidas de Administrador */}
+      <Route path="/admin/dashboard">
+        {(params) => <ProtectedRoute component={AdminDashboard} params={params} />}
+      </Route>
+      
+      <Route path="/admin/kpis">
+        {(params) => <ProtectedRoute component={AdminKPIs} params={params} />}
+      </Route>
+      
+      <Route path="/admin/users">
+        {(params) => <ProtectedRoute component={AdminUsers} params={params} />}
+      </Route>
+
+      <Route path={"/404"} component={NotFound} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
