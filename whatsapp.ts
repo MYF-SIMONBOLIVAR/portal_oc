@@ -30,7 +30,7 @@ export async function sendWhatsAppNotification(
   payload: WhatsAppNotificationPayload
 ): Promise<boolean> {
   try {
-    const apiUrl = ENV.whatsappApiUrl || "https://repuestossimonbolivar.com/api/whatsapp/test?tipo=logistica_diligencia";
+    const apiUrl = ENV.whatsappApiUrl || "https://repuestossimonbolivar.com/api/whatsapp/test?tipo=proveedores_orden_compra";";
     const token = ENV.whatsappApiToken || "t{;tB9oO}0WSix=qi!/{f";
 
     const telefonoDestino = payload.numero_telefonico.replace(/\s+/g, '');
