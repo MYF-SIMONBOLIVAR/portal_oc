@@ -13,6 +13,7 @@ import cookieParser from "cookie-parser";
 
 async function startServer() {
   const app = express();
+  app.set("trust proxy", 1);
   app.use(cookieParser()); // Esto le pone los lentes al servidor para ver las cookies
   const server = createServer(app);
 
