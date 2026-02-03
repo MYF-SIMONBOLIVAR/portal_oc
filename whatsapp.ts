@@ -95,7 +95,9 @@ export async function sendRejectionNotification(
       {
         orden_compra: payload.consecutivo,
         proveedor: payload.proveedor,
+        url: payload.url,   
         numero_telefonico: payload.celular,
+        
       },
       { headers: { "Content-Type": "application/json", "Token": token } }
     );
