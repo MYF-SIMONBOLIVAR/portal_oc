@@ -12,51 +12,19 @@ import AdminKPIs from "./AdminKPIs";
 import AdminUsers from "./AdminUsers";
 import { ProtectedRoute } from "./ProtectedRoute";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/provider/dashboard"} component={ProviderDashboard} />
-      <Route path={"/provider/order/:id"} component={OrderDetail} />
-      <Route path={"/admin/dashboard"} component={AdminDashboard} />
-      <Route path={"/admin/kpis"} component={AdminKPIs} />
-      <Route path={"/admin/users"} component={AdminUsers} />
-      <Route path={"/404"} component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
-function App() {
-  return (
-    <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
-}
-function Router() {
+/**
+ * Componente de Rutas (Renombrado para evitar conflictos con Vite/Esbuild)
+ */
+function AppRoutes() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
       
-      {/* Rutas de Proveedor (Públicas o podrías protegerlas luego también) */}
+      {/*  Rutas de Proveedor */}
       <Route path={"/provider/dashboard"} component={ProviderDashboard} />
       <Route path={"/provider/order/:id"} component={OrderDetail} />
 
-      {/* 🔐 Rutas Protegidas de Administrador */}
+      {/*  Rutas Protegidas de Administrador */}
       <Route path="/admin/dashboard">
         {(params) => <ProtectedRoute component={AdminDashboard} params={params} />}
       </Route>
@@ -69,9 +37,27 @@ function Router() {
         {(params) => <ProtectedRoute component={AdminUsers} params={params} />}
       </Route>
 
+      {/*  Manejo de errores 404 */}
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+/**
+ *  Componente Principal de la Aplicación
+ */
+function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light">
+        <TooltipProvider>
+          <Toaster />
+          {/* Llamamos al componente de rutas corregido */}
+          <AppRoutes />
+        </TooltipProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
