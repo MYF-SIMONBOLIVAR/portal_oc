@@ -11,8 +11,7 @@ export const trpcClient = trpc.createClient({
       fetch(url, options) {
         return fetch(url, {
           ...options,
-          // ESTO ES LO QUE HACE QUE EL LOGIN PERSISTA
-          credentials: "include", 
+          credentials: "include", // Esto "pega" la cookie en cada petición
         });
       },
     }),
