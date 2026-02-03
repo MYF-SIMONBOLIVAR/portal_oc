@@ -363,6 +363,57 @@ export const appRouter = router({
         return await getOrderConfirmationHistory(input.orderId);
       }),
 
+    reject: publicProcedure
+      .input(
+        z.object({
+          orderId: z.number(),
+          providerId: z.number(),
+          motivo: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const order = await getOrderById(input.orderId);
+        const provider = await getProviderById(input.providerId);
+
+        if (!order || !provider) {
+          throw new Error("Orden o Proveedor no encontrado");
+        }
+
+        if (order.providerId !== input.providerId) {
+          throw new Error("No autorizado");
+        }
+
+        const previousStatus = order.estadoOrden;
+        
+        // 1. Actualizar estado a rechazada
+        await updateOrderStatus(input.orderId, "rechazada");
+
+        // 2. Registrar en historial
+        await createConfirmation({
+          purchaseOrderId: input.orderId,
+          providerId: input.providerId,
+          estadoAnterior: previousStatus as any,
+          estadoNuevo: "rechazada",
+          confirmedAt: new Date(),
+          ipAddress: ctx.req.ip || "unknown",
+          userAgent: ctx.req.get("user-agent") || "unknown",
+        });
+
+        // 3. Enviar notificación de WhatsApp (RECHAZO)
+        try {
+          const ordenNumero = formatOrderNumber(order.tipoDocumento || "FOC", order.consecutivo);
+          await sendRejectionNotification({
+            consecutivo: ordenNumero,
+            proveedor: provider.razonSocial,
+            celular: "3233315933" // Número compras
+          });
+        } catch (wsError) {
+          console.error("[WhatsApp] Error al enviar rechazo:", wsError);
+        }
+
+        return { success: true, order: await getOrderById(input.orderId) };
+      }),
+
     updateGuiaAndFactura: publicProcedure
       .input(
         z.object({
