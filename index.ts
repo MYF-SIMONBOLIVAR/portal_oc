@@ -10,10 +10,10 @@ import { createContext } from "./context";
 import { startScheduler } from "./scheduler";
 import cookieParser from "cookie-parser";
 // ...
-app.use(cookieParser()); // Esto le pone los lentes al servidor para ver las cookies
 
 async function startServer() {
   const app = express();
+  app.use(cookieParser()); // Esto le pone los lentes al servidor para ver las cookies
   const server = createServer(app);
 
   app.use(express.json({ limit: "50mb" }));
