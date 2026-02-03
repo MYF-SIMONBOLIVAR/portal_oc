@@ -267,7 +267,7 @@ class SDKServer {
     const session = await this.verifySession(sessionCookie);
 
     if (!session) {
-      throw ForbiddenError("Invalid session cookie");
+      throw new Error("Invalid session cookie");
     }
 
     const sessionUserId = session.openId;
@@ -288,12 +288,12 @@ class SDKServer {
         user = await db.getUserByOpenId(userInfo.openId);
       } catch (error) {
         console.error("[Auth] Failed to sync user from OAuth:", error);
-        throw ForbiddenError("Failed to sync user info");
+        throw new Error("Failed to sync user info");
       }
     }
 
     if (!user) {
-      throw ForbiddenError("User not found");
+      throw new Error("User not found");
     }
 
     await db.upsertUser({
