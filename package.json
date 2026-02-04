@@ -13,6 +13,8 @@
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "cookie-parser": "^1.4.7",
     "@aws-sdk/client-s3": "^3.693.0",
     "@aws-sdk/s3-request-presigner": "^3.693.0",
@@ -81,9 +83,6 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "cors": "^2.8.5",
-    "cookie-parser": "^1.4.6",
-    "express": "^4.18.2",
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "^4.1.3",
