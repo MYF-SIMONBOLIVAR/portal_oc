@@ -255,9 +255,12 @@ export const appRouter = router({
             s3Url: input.fileUrl,
             uploadedBy: input.providerId,
           });
-          return { success: true, message: "Archivo cargado exitosamente" };
-        }),
-    }, // 👈 Cierre limpio de attachments
+         return { success: true, message: "Archivo cargado exitosamente" };
+        }), // Cierra el .mutation de upload
+    },     // Cierra el objeto 'attachments'
+});        // Cierra el router principal (ESTA ES LA LÍNEA 725)
+
+// ❌ ASEGÚRATE DE QUE NO HAYA NADA MÁS DESPUÉS DE ESTO
 
   orders: router({
     myOrders: publicProcedure
