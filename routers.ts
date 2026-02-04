@@ -185,7 +185,7 @@ export const appRouter = router({
           password: z.string().min(6),
         })
       )
-      .mutation(async ({ input, ctx }) => { // 👈 Agregamos ctx aquí
+      .mutation(async ({ input, ctx }) => { 
         if (!isValidNIT(input.nit)) {
           throw new Error("NIT invalido");
         }
@@ -226,7 +226,7 @@ export const appRouter = router({
           },
         };
       }),
-  attachments: router({
+  attachments: {
     upload: publicProcedure
       .input(
         z.object({
