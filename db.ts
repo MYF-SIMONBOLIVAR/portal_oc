@@ -250,6 +250,15 @@ export async function getOrderAttachments(purchaseOrderId: number) {
     .where(eq(attachments.purchaseOrderId, purchaseOrderId));
 }
 
+export async function getOrderItems(purchaseOrderId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(orderItems)
+    .where(eq(orderItems.purchaseOrderId, purchaseOrderId));
+}
 export async function getOrderItemsByConsecutivo(consecutivo: string) {
   const db = await getDb();
   if (!db) return [];
