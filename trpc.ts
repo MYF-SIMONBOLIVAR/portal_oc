@@ -4,14 +4,23 @@ import type { AppRouter } from "./index";
 
 export const trpc = createTRPCReact<AppRouter>();
 
-export const trpcClient = trpc.createClient({
+// En tu configuración de tRPC Client (Frontend)
+export const trpc = createTRPCReact<AppRouter>();
+
+export const client = trpc.createClient({
   links: [
     httpBatchLink({
-      url: `${window.location.origin}/api/trpc`,
-      fetch(url, options) {
+      url: 'https://portal-oc.onrender.com/trpc',
+      // 🚀 ESTO ES LO QUE FALTA:
+      headers() {
+        return {
+          // Si usas headers manuales
+        };
+      },
+      async fetch(url, options) {
         return fetch(url, {
           ...options,
-          credentials: "include", // Esto "pega" la cookie en cada petición
+          credentials: 'include', // 👈 ESTA ES LA LLAVE MAESTRA
         });
       },
     }),
