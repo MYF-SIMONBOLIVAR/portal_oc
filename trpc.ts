@@ -9,18 +9,16 @@ export const client = trpc.createClient({
     httpBatchLink({
       url: "/api/trpc",
       async fetch(url, options) {
-        // 🚀 CAMBIO VITAL: Usa 'providerToken', NO 'providerId'
-        const token = localStorage.getItem("providerToken"); 
-        
-        return fetch(url, {
-          ...options,
-          credentials: "include",
-          headers: {
-            ...options.headers,
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        });
-      },
+      const token = localStorage.getItem("providerToken"); // 👈 DEBE SER ESTE NOMBRE
+      return fetch(url, {
+       ...options,
+       credentials: "include",
+       headers: {
+         ...options.headers,
+         Authorization: token ? `Bearer ${token}` : "", // 👈 ESTO MANDA EL TOKEN
+         },
+       });
+     }
     }),
   ],
 });
