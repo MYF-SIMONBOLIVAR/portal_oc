@@ -257,7 +257,7 @@ export const appRouter = router({
         });
         return { success: true, message: "Archivo cargado exitosamente" };
       }),
-  }),
+  })
 
   orders: router({
     myOrders: publicProcedure
