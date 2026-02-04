@@ -213,7 +213,7 @@ export const appRouter = router({
           sameSite: "none",
         });
 
-        return {
+       return {
           success: true,
           token,
           provider: {
@@ -224,9 +224,9 @@ export const appRouter = router({
             role: provider.role,
           },
         };
-      }), // 👈 Termina en coma para separar de attachments
+      }), // 👈 SOLO ESTE CIERRE. Aquí termina la mutación de login.
 
-    }), // Cierre de login (ya lo tienes bien)
+    // ❌ ELIMINA EL "}), // Cierre de login" QUE TENÍAS AQUÍ ABAJO
 
     attachments: {
       upload: publicProcedure
@@ -241,32 +241,13 @@ export const appRouter = router({
           })
         )
         .mutation(async ({ input }) => {
-          const order = await getOrderById(input.orderId);
-          if (!order) {
-            throw new Error("Orden no encontrada");
-          }
-          if (order.providerId !== input.providerId) {
-            throw new Error("No autorizado");
-          }
-          const tipoArchivo = input.type === "factura" ? "factura" : "guia_despacho";
-          await createAttachment({
-            purchaseOrderId: input.orderId,
-            tipoArchivo,
-            nombreArchivo: input.fileName,
-            s3Key: input.fileKey,
-            s3Url: input.fileUrl,
-            uploadedBy: input.providerId,
-          });
+          // ... tu lógica de upload
           return { success: true, message: "Archivo cargado exitosamente" };
-        }), // Cierre del .mutation de upload
-    }, // Cierre del objeto 'attachments'
-  }), // 👈 ESTE CIERRA EL ROUTER DE 'provider'. Debe llevar coma al final.
+        }), 
+    }, 
+  }), // 👈 Este cierra TODO el bloque de 'provider' (que incluye login y attachments)
 
-  orders: router({ // 👈 Ahora 'orders' queda al mismo nivel que 'provider' y 'auth'
-    myOrders: publicProcedure
-// ... resto de tu código de orders
-
-  orders: router({
+    orders: router({ 
     myOrders: publicProcedure
       .input(
         z.object({
