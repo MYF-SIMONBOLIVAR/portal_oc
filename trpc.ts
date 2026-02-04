@@ -5,19 +5,20 @@ export const trpc = createTRPCReact<AppRouter>();
 
 export const client = trpc.createClient({
   links: [
-    httpBatchLink({
-      url: "/api/trpc",
-      async fetch(url, options) {
-        const token = localStorage.getItem("providerToken");
-        return fetch(url, {
-          ...options,
-          credentials: "include",
-          headers: {
-            ...options.headers,
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        });
-      },
-    }),
-  ],
+  httpBatchLink({
+    url: "/api/trpc",
+    async fetch(url, options) {
+      // 🚀 CAMBIO VITAL: Usa 'providerToken', no 'providerId'
+      const token = localStorage.getItem("providerToken"); 
+      return fetch(url, {
+        ...options,
+        credentials: "include",
+        headers: {
+          ...options.headers,
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      });
+    },
+  }),
+],
 });
