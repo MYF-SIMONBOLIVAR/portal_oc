@@ -4,49 +4,53 @@ import { COOKIE_NAME } from "./const";
 import { sdk } from "./sdk"; 
 
 export async function createContext(opts: CreateExpressContextOptions) {
+  const { req, res } = opts;
   let user: any = null;
 
   try {
-    // 1. Intentar leer el token de las cookies (vía estándar)
-    let token = opts.req.cookies?.[COOKIE_NAME];
+    // 1. Extraer el token de cualquier fuente (Cookies, Header manual o Authorization)
+    let token = req.cookies?.[COOKIE_NAME];
 
-    // 2. SI NO EXISTE, buscarla manualmente en el string del Header Cookie
-    if (!token && opts.req.headers.cookie) {
-       const rawCookies = opts.req.headers.cookie.split(';');
-       const target = rawCookies.find(c => c.trim().startsWith(`${COOKIE_NAME}=`));
-       if (target) {
-         token = target.split('=')[1];
-       }
+    if (!token && req.headers.cookie) {
+       const target = req.headers.cookie.split(';').find(c => c.trim().startsWith(`${COOKIE_NAME}=`));
+       if (target) token = target.split('=')[1];
     }
 
-    // 3. PLAN C: Si sigue sin existir, buscar en el Header Authorization (Bearer Token)
-    if (!token && opts.req.headers.authorization) {
-      const parts = opts.req.headers.authorization.split(' ');
+    if (!token && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
       if (parts.length === 2 && parts[0] === 'Bearer') {
         token = parts[1];
       }
     }
 
-    // 4. Intentar autenticar con el SDK de la plataforma
-    const sdkUser = await sdk.authenticateRequest(opts.req).catch(() => null);
+    // 2. Intentar autenticar con el SDK de la plataforma (Opcional)
+    const sdkUser = await sdk.authenticateRequest(req).catch(() => null);
     
-    if (sdkUser && token) {
-      // 5. Decodificar nuestro JWT para obtener el ROL (admin o provider)
-      const decoded = verifyProviderToken(token);
-      
-      // 6. Fusionar: Datos de identidad del SDK + ROL de nuestro token
+    // 3. Validar nuestro propio Token (Independiente del SDK)
+    const myDecodedToken = token ? verifyProviderToken(token) : null;
+
+    if (sdkUser) {
+      // Caso A: El SDK funciona, le inyectamos nuestro rol
       user = {
         ...sdkUser,
-        role: decoded?.role || 'provider' 
+        role: myDecodedToken?.role || 'provider' 
       };
-      
-      console.log(`[Context] ✅ Usuario autenticado: ${user.nit || user.id} | Rol: ${user.role}`);
-    } else if (sdkUser) {
-      // Si hay SDK pero no hay token nuestro, mantenemos el usuario pero sin nuestro rol extendido
-      user = sdkUser;
-      console.log(`[Context] ⚠️ SDK detectado pero sin cookie/token de rol. Rol por defecto aplicado.`);
+      console.log(`[Context] ✅ SDK Autenticado: ${user.nit || user.id} | Rol: ${user.role}`);
+    } 
+    else if (myDecodedToken) {
+      // Caso B: EL SDK FALLÓ (Bypass), pero nuestro JWT es válido
+      // Reconstruimos el usuario con la data de nuestro token para no depender del SDK
+      user = {
+        id: myDecodedToken.id,
+        nit: myDecodedToken.nit,
+        role: myDecodedToken.role,
+        razonSocial: "Proveedor Autenticado",
+        email: "", 
+        isBypass: true // Marcador interno para saber que entró por JWT propio
+      };
+      console.log(`[Context] 🛡️ Bypass SDK: Usando JWT propio para ${user.nit} | Rol: ${user.role}`);
     } else {
-      console.log(`[Context] ❌ Petición anónima (sin sesión válida)`);
+      console.log(`[Context] ❌ Petición anónima (Sin cookie ni header válido)`);
     }
 
   } catch (error) {
@@ -55,8 +59,8 @@ export async function createContext(opts: CreateExpressContextOptions) {
   }
 
   return {
-    req: opts.req,
-    res: opts.res,
+    req,
+    res,
     user,
   };
 }
