@@ -226,6 +226,8 @@ export const appRouter = router({
         };
       }), // 👈 Termina en coma para separar de attachments
 
+    }), // Cierre de login (ya lo tienes bien)
+
     attachments: {
       upload: publicProcedure
         .input(
@@ -255,10 +257,14 @@ export const appRouter = router({
             s3Url: input.fileUrl,
             uploadedBy: input.providerId,
           });
-        return { success: true, message: "Archivo cargado exitosamente" };
-      } // 1. Cierra el .mutation de upload
-    };     // 2. Cierra el objeto 'attachments' (OJO: SIN PUNTO Y COMA AQUÍ)
-  }),    // 3. Cierra el router principal
+          return { success: true, message: "Archivo cargado exitosamente" };
+        }), // Cierre del .mutation de upload
+    }, // Cierre del objeto 'attachments'
+  }), // 👈 ESTE CIERRA EL ROUTER DE 'provider'. Debe llevar coma al final.
+
+  orders: router({ // 👈 Ahora 'orders' queda al mismo nivel que 'provider' y 'auth'
+    myOrders: publicProcedure
+// ... resto de tu código de orders
 
   orders: router({
     myOrders: publicProcedure
