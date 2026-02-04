@@ -31,10 +31,29 @@ export default function ProviderDashboard() {
     setProviderName(name);
   }, [setLocation]);
 
-  const { data: orders = [], isLoading, refetch } = trpc.orders.myOrders.useQuery(
+  // 1. Traemos los datos de la base de datos
+  const { data: rawOrders = [], isLoading, refetch } = trpc.orders.myOrders.useQuery(
     { providerId: providerId || 0 },
     { enabled: !!providerId }
   );
+
+  // 2. Aquí creamos la lista agrupada 
+  const groupedOrders = useMemo(() => {
+    return rawOrders.reduce((acc: any[], current: any) => {
+      const existingOrder = acc.find(o => o.orderNumber === current.orderNumber);
+      if (existingOrder) {
+        existingOrder.totalAmount = Number(existingOrder.totalAmount) + Number(current.totalAmount);
+        existingOrder.items.push(current);
+      } else {
+        acc.push({
+          ...current,
+          totalAmount: Number(current.totalAmount),
+          items: [current]
+        });
+      }
+      return acc;
+    }, []);
+  }, [rawOrders]); 
 
   const confirmMutation = trpc.orders.confirm.useMutation({
     onSuccess: () => {
@@ -272,55 +291,84 @@ export default function ProviderDashboard() {
                       <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {filteredOrders.map((order: any) => (
-                      <TableRow key={order.id} className={isOrderLate(order) ? "bg-red-50" : ""}>
-                        <TableCell className="font-medium">{order.consecutivo}</TableCell>
-                        <TableCell>{format(new Date(order.fecha), "dd/MM/yyyy")}</TableCell>
-                        <TableCell className="text-right font-semibold">
-                          ${parseFloat(order.valorTotal).toLocaleString("es-CO")}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(order.estadoOrden)}</TableCell>
-                        <TableCell>
-                          {order.fechaEstimadaEntrega ? (
-                            <div className="flex items-center gap-2">
-                              <span>{format(new Date(order.fechaEstimadaEntrega), "dd/MM/yyyy")}</span>
-                              {isOrderLate(order) && (
-                                <Badge className="bg-red-100 text-red-800">Atrasada</Badge>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-slate-400">Sin fecha</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          {order.estadoOrden === "pendiente" && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleConfirm(order.id)}
-                                disabled={confirmMutation.isPending}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Confirmar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleReject(order.id)}
-                                disabled={rejectMutation.isPending}
-                              >
-                                <XCircle className="w-4 h-4 mr-1" />
-                                Rechazar
-                              </Button>
-                            </>
-                          )}
-                          <Button size="sm" variant="outline" onClick={() => setLocation(`/provider/order/${order.id}`)}>
-                            Ver Detalles
-                          </Button>
+                 <TableBody>
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                          Cargando órdenes...
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : filteredOrders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                          No se encontraron órdenes.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredOrders.map((order: any) => (
+                        <TableRow 
+                          key={order.consecutivo} 
+                          className={isOrderLate(order) ? "bg-red-50" : ""}
+                        >
+                          <TableCell className="font-medium">
+                            {order.consecutivo}
+                            <div className="text-[10px] text-slate-400 font-normal">
+                              {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {format(new Date(order.fecha), "dd/MM/yyyy")}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">
+                            ${order.valorTotal.toLocaleString("es-CO")}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(order.estadoOrden)}</TableCell>
+                          <TableCell>
+                            {order.fechaEstimadaEntrega ? (
+                              <div className="flex items-center gap-2">
+                                <span>{format(new Date(order.fechaEstimadaEntrega), "dd/MM/yyyy")}</span>
+                                {isOrderLate(order) && (
+                                  <Badge className="bg-red-100 text-red-800 text-[10px] border-none">Atrasada</Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 text-sm italic">Sin fecha</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right space-x-2">
+                            {order.estadoOrden === "pendiente" && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleConfirm(order.id)}
+                                  disabled={confirmMutation.isPending}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  Confirmar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleReject(order.id)}
+                                  disabled={rejectMutation.isPending}
+                                >
+                                  <XCircle className="w-4 h-4 mr-1" />
+                                  Rechazar
+                                </Button>
+                              </>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => setLocation(`/provider/order/${order.consecutivo}`)}
+                            >
+                              Ver Detalles
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
