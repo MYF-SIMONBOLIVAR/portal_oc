@@ -8,13 +8,16 @@ export const trpc = createTRPCReact<AppRouter>();
 export const client = trpc.createClient({
   links: [
     httpBatchLink({
-      url: '/trpc', // O la URL completa si es necesario
-      async fetch(url, options) {
-        return fetch(url, {
-          ...options,
-          credentials: 'include', // 🚀 Esta es la pieza clave para las cookies
-        });
-      },
-    }),
-  ],
-});
+    url: "/api/trpc",
+    async fetch(url, options) {
+      const token = localStorage.getItem("portal_token");
+      return fetch(url, {
+        ...options,
+        credentials: "include", // Para cookies (si funcionan)
+        headers: {
+          ...options.headers,
+          Authorization: token ? `Bearer ${token}` : "", // Para bypass (Plan B)
+        },
+      });
+    },
+  }),
