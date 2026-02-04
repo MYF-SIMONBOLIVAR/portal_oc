@@ -36,12 +36,15 @@ export function generateProviderToken(providerId: number, nit: string, role: str
   console.log("[Auth] Generando token para providerId:", providerId, "nit:", nit, "role:", role);
   
   const payload = {
-    providerId,
+    id: providerId, // 👈 Cambiamos 'providerId' por 'id' para que el Context lo reconozca
     nit,
-    role, // <--- AHORA EL TOKEN SABRÁ QUE ERES ADMIN
+    role, 
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 horas
+    exp: Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60), // 🚀 ¡Súbele a 1 año! 24h es muy poco y te sacará rápido
   };
+  
+  return jwt.sign(payload, JWT_SECRET);
+}
 
   // Crear un token basado en HMAC (Igual que antes)
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
