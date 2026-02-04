@@ -18,24 +18,22 @@ export default function Home() {
   const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const loginMutation = trpc.provider.login.useMutation({
-    onSuccess: (data: any) => {
-      // Guardamos la info básica
-      localStorage.setItem("providerToken", data.token);
-      localStorage.setItem("providerId", data.provider.id.toString());
-      localStorage.setItem("providerNit", data.provider.nit);
-      
-      // Guardamos el rol para que el frontend sepa quién eres
-      localStorage.setItem("userRole", data.provider.role || "provider");
+  onSuccess: (data: any) => {
+    // 1. Guardamos la info básica (Solo una vez)
+    localStorage.setItem("providerToken", data.token);
+    localStorage.setItem("providerId", data.provider.id.toString());
+    localStorage.setItem("providerNit", data.provider.nit);
+    localStorage.setItem("userRole", data.provider.role || "provider");
 
-      // Redirección inteligente:
-      // Si el rol es 'admin', va a la consola de administración
-      // De lo contrario, va a la vista de proveedor
-      if (data.provider.role === 'admin') {
-        setLocation("/admin/dashboard");
-      } else {
-        setLocation("/provider/dashboard");
-      }
-    },
+    console.log("Sesión iniciada como:", data.provider.role);
+
+    // 2. Redirección inteligente
+    if (data.provider.role === 'admin') {
+      setLocation("/admin/dashboard");
+    } else {
+      setLocation("/provider/dashboard");
+    }
+  },
     onError: (err: any) => {
       setLoginError(err.message || "Error al iniciar sesión");
       setIsLoginLoading(false);
