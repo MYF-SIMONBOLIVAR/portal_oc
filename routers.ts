@@ -185,7 +185,7 @@ export const appRouter = router({
           password: z.string().min(6),
         })
       )
-      .mutation(async ({ input, ctx }) => { 
+      .mutation(async ({ input, ctx }) => {
         if (!isValidNIT(input.nit)) {
           throw new Error("NIT invalido");
         }
@@ -205,12 +205,11 @@ export const appRouter = router({
 
         const token = generateProviderToken(provider.id, provider.nit, provider.role);
 
-        
         ctx.res.cookie("portal_session", token, {
-          maxAge: 365 * 24 * 60 * 60 * 1000, // 1 año
+          maxAge: 365 * 24 * 60 * 60 * 1000,
           path: "/",
           httpOnly: true,
-          secure: true,   // Necesario para Render (HTTPS)
+          secure: true,
           sameSite: "none",
         });
 
@@ -225,40 +224,40 @@ export const appRouter = router({
             role: provider.role,
           },
         };
-      }),
-  attachments: {
-    upload: publicProcedure
-      .input(
-        z.object({
-          orderId: z.number(),
-          providerId: z.number(),
-          type: z.enum(["factura", "guia"]),
-          fileKey: z.string(),
-          fileUrl: z.string(),
-          fileName: z.string(),
-        })
-      )
-      .mutation(async ({ input }) => {
-        const order = await getOrderById(input.orderId);
-        if (!order) {
-          throw new Error("Orden no encontrada");
-        }
-        if (order.providerId !== input.providerId) {
-          throw new Error("No autorizado");
-        }
-        const tipoArchivo = input.type === "factura" ? "factura" : "guia_despacho";
-        await createAttachment({
-          purchaseOrderId: input.orderId,
-          tipoArchivo,
-          nombreArchivo: input.fileName,
-          s3Key: input.fileKey,
-          s3Url: input.fileUrl,
-          uploadedBy: input.providerId,
-        });
-        return { success: true, message: "Archivo cargado exitosamente" };
-      }),
-  },
-  });
+      }), // 👈 Termina en coma para separar de attachments
+
+    attachments: {
+      upload: publicProcedure
+        .input(
+          z.object({
+            orderId: z.number(),
+            providerId: z.number(),
+            type: z.enum(["factura", "guia"]),
+            fileKey: z.string(),
+            fileUrl: z.string(),
+            fileName: z.string(),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const order = await getOrderById(input.orderId);
+          if (!order) {
+            throw new Error("Orden no encontrada");
+          }
+          if (order.providerId !== input.providerId) {
+            throw new Error("No autorizado");
+          }
+          const tipoArchivo = input.type === "factura" ? "factura" : "guia_despacho";
+          await createAttachment({
+            purchaseOrderId: input.orderId,
+            tipoArchivo,
+            nombreArchivo: input.fileName,
+            s3Key: input.fileKey,
+            s3Url: input.fileUrl,
+            uploadedBy: input.providerId,
+          });
+          return { success: true, message: "Archivo cargado exitosamente" };
+        }),
+    }, // 👈 Cierre limpio de attachments
 
   orders: router({
     myOrders: publicProcedure
