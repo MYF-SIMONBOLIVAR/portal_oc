@@ -1,9 +1,11 @@
 import crypto from "crypto";
 import { ENV } from "./env";
 
+// Usamos el secret de las cookies para firmar nuestro token manual
+const JWT_SECRET = ENV.cookieSecret;
+
 /**
- * Hash de contraseña usando PBKDF2 (compatible con Node.js estándar)
- * En producción, considera usar bcrypt o argon2
+ * Hash de contraseña usando PBKDF2
  */
 export function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -29,45 +31,42 @@ export function verifyPassword(password: string, hash: string): boolean {
 }
 
 /**
- * Generar JWT simple para sesión de proveedor
- * En producción, usar una librería como jsonwebtoken
+ * Generar JWT manual para sesión de proveedor
+ * Duración: 1 año para evitar cierres de sesión inesperados
  */
 export function generateProviderToken(providerId: number, nit: string, role: string): string {
-  console.log("[Auth] Generando token para providerId:", providerId, "nit:", nit, "role:", role);
+  console.log("[Auth] Generando token para:", nit, "role:", role);
   
   const payload = {
-    id: providerId, // 👈 Cambiamos 'providerId' por 'id' para que el Context lo reconozca
+    id: providerId, // Unificado para que el Context lo reconozca
     nit,
     role, 
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60), // 🚀 ¡Súbele a 1 año! 24h es muy poco y te sacará rápido
+    exp: Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60), 
   };
-  
-  return jwt.sign(payload, JWT_SECRET);
-}
 
-  // Crear un token basado en HMAC (Igual que antes)
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = crypto
-    .createHmac("sha256", ENV.cookieSecret)
+    .createHmac("sha256", JWT_SECRET)
     .update(`${header}.${body}`)
     .digest("base64url");
 
-  const finalToken = `${header}.${body}.${signature}`;
-  console.log("[Auth] Token generado con rol exitosamente");
-  return finalToken;
+  return `${header}.${body}.${signature}`;
 }
 
 /**
  * Verificar y decodificar JWT de proveedor
  */
-export function verifyProviderToken(token: string): { providerId: number; nit: string; role: string } | null { // <--- Agregamos role al tipo de retorno
+export function verifyProviderToken(token: string): { id: number; nit: string; role: string } | null {
   try {
-    const [header, body, signature] = token.split(".");
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    
+    const [header, body, signature] = parts;
 
     const expectedSignature = crypto
-      .createHmac("sha256", ENV.cookieSecret)
+      .createHmac("sha256", JWT_SECRET)
       .update(`${header}.${body}`)
       .digest("base64url");
 
@@ -77,55 +76,50 @@ export function verifyProviderToken(token: string): { providerId: number; nit: s
 
     if (payload.exp < Math.floor(Date.now() / 1000)) return null;
 
-    // AHORA DEVOLVEMOS EL ROL TAMBIÉN
     return {
-      providerId: payload.providerId,
+      id: payload.id,
       nit: payload.nit,
-      role: payload.role || "provider", // Si no tiene rol, asumimos que es un proveedor por seguridad
+      role: payload.role || "provider",
     };
   } catch (error) {
+    console.error("[Auth] Error verificando token:", error);
     return null;
   }
 }
 
 /**
- * Generar código OTP de 6 dígitos para verificación
+ * Generar código OTP de 6 dígitos
  */
 export function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 /**
- * Validar formato de NIT colombiano (básico)
+ * Validar formato de NIT colombiano
  */
 export function isValidNIT(nit: string): boolean {
-  // NIT debe ser numérico y tener entre 5 y 15 caracteres
   const nitRegex = /^\d{5,15}$/;
   return nitRegex.test(nit.replace(/[.-]/g, ""));
 }
 
-
 /**
- * Generar token de verificación para registro o reset de contraseña
- * Token válido por 24 horas
+ * Generar token de verificación hexadecimal
  */
 export function generateVerificationToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
 /**
- * Validar que un token no haya expirado
+ * Validar expiración de fecha
  */
 export function isTokenExpired(expiresAt: Date): boolean {
   return new Date() > expiresAt;
 }
 
-
 /**
- * Validar formato de celular colombiano (10 dígitos)
+ * Validar celular colombiano (10 dígitos)
  */
 export function isValidPhoneNumber(phone: string): boolean {
-  // Celular debe ser numérico y tener exactamente 10 dígitos
   const phoneRegex = /^\d{10}$/;
   return phoneRegex.test(phone.replace(/[^\d]/g, ""));
 }
