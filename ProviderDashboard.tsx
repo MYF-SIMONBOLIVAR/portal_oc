@@ -31,130 +31,240 @@ export default function ProviderDashboard() {
     setProviderName(name);
   }, [setLocation]);
 
-  // 1. Traemos los datos crudos
-  const { data: rawOrders = [], isLoading, refetch } = trpc.orders.myOrders.useQuery(
+  const { data: orders = [], isLoading, refetch } = trpc.orders.myOrders.useQuery(
     { providerId: providerId || 0 },
     { enabled: !!providerId }
   );
 
-  // 2. Agrupamos por consecutivo
-  const groupedOrders = useMemo(() => {
-    return rawOrders.reduce((acc: any[], current: any) => {
-      const existingOrder = acc.find(o => o.consecutivo === current.consecutivo);
-      if (existingOrder) {
-        existingOrder.valorTotal = Number(existingOrder.valorTotal) + Number(current.valorTotal);
-        existingOrder.items.push(current);
-      } else {
-        acc.push({
-          ...current,
-          valorTotal: Number(current.valorTotal),
-          items: [current]
-        });
-      }
-      return acc;
-    }, []);
-  }, [rawOrders]);
-
-  // 3. Filtramos (usando la variable agrupada)
-  const filteredOrders = useMemo(() => {
-    return groupedOrders.filter((order: any) => {
-      if (!order.fecha) return true;
-      const orderDate = new Date(order.fecha);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate) : null;
-
-      if (start && orderDate < start) return false;
-      if (end && orderDate > end) return false;
-      return true;
-    });
-  }, [groupedOrders, startDate, endDate]);
-
   const confirmMutation = trpc.orders.confirm.useMutation({
-    onSuccess: () => refetch(),
-    onError: (err) => setError(err.message || "Error al confirmar orden"),
+    onSuccess: () => {
+      refetch();
+    },
+    onError: (err) => {
+      setError(err.message || "Error al confirmar orden");
+    },
   });
 
   const rejectMutation = trpc.orders.reject.useMutation({
-    onSuccess: () => refetch(),
-    onError: (err) => setError(err.message || "Error al rechazar orden"),
+    onSuccess: () => {
+      refetch();
+    },
+    onError: (err) => {
+      setError(err.message || "Error al rechazar orden");
+    },
   });
 
-  const handleConfirm = (id: number) => confirmMutation.mutate({ id });
-  const handleReject = (id: number) => rejectMutation.mutate({ id });
+  const filteredOrders = useMemo(() => {
+    if (!startDate || !endDate) {
+      return orders;
+    }
 
-  const isOrderLate = (order: any) => {
-    if (!order.fechaEstimadaEntrega || order.estadoOrden === "confirmada") return false;
-    return new Date(order.fechaEstimadaEntrega) < new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    if (start > end) {
+      setError("La fecha inicial debe ser menor a la fecha final");
+      return orders;
+    }
+
+    setError("");
+    return orders.filter((order: any) => {
+      const orderDate = new Date(order.fecha);
+      return orderDate >= start && orderDate <= end;
+    });
+  }, [orders, startDate, endDate]);
+
+  // Calcular estadísticas
+  const stats = useMemo(() => {
+    const today = startOfDay(new Date());
+    let pendientes = 0;
+    let confirmadas = 0;
+    let atrasadas = 0;
+
+    orders.forEach((order: any) => {
+      if (order.estadoOrden === "pendiente") {
+        pendientes++;
+        if (order.fechaEstimadaEntrega && isBefore(new Date(order.fechaEstimadaEntrega), today)) {
+          atrasadas++;
+        }
+      } else if (order.estadoOrden === "confirmada") {
+        confirmadas++;
+      }
+    });
+
+    return { pendientes, confirmadas, atrasadas };
+  }, [orders]);
+
+  const handleConfirm = (orderId: number) => {
+    if (!providerId) return;
+    confirmMutation.mutate({ orderId, providerId });
+  };
+
+  const handleReject = (orderId: number) => {
+    if (!providerId) return;
+    // Nota: Aquí usamos el mismo endpoint de confirm, pero en el futuro podría haber un endpoint específico para rechazar
+    rejectMutation.mutate({ orderId, providerId });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("providerToken");
+    localStorage.removeItem("providerId");
+    localStorage.removeItem("providerNit");
+    setLocation("/");
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pendiente": return <Badge className="bg-yellow-100 text-yellow-800 border-none">Pendiente</Badge>;
-      case "confirmada": return <Badge className="bg-green-100 text-green-800 border-none">Confirmada</Badge>;
-      case "rechazada": return <Badge className="bg-red-100 text-red-800 border-none">Rechazada</Badge>;
-      default: return <Badge>{status}</Badge>;
+      case "confirmada":
+        return <Badge className="bg-green-100 text-green-800">Confirmada</Badge>;
+      case "pendiente":
+        return <Badge className="bg-yellow-100 text-yellow-800">Pendiente</Badge>;
+      case "rechazada":
+        return <Badge className="bg-red-100 text-red-800">Rechazada</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
     }
   };
 
+  const isOrderLate = (order: any) => {
+    if (!order.fechaEstimadaEntrega) return false;
+    const today = startOfDay(new Date());
+    return isBefore(new Date(order.fechaEstimadaEntrega), today);
+  };
+
+  if (!providerId) {
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Package className="w-6 h-6 text-blue-600" />
-            <h1 className="font-bold text-xl text-slate-900">Portal Proveedores</h1>
+            <Package className="w-8 h-8 text-blue-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Mis Ordenes</h1>
+              <p className="text-sm text-slate-600">NIT: {providerName}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-500 font-medium">{providerName}</span>
-            <Button variant="ghost" size="sm" onClick={() => { localStorage.clear(); setLocation("/"); }}>
-              <LogOut className="w-4 h-4 mr-2" /> Salir
-            </Button>
-          </div>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Cerrar Sesion
+          </Button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <main className="container mx-auto px-4 py-8">
+        {/* Resumen de Estados */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Órdenes Pendientes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Cambiado orders por filteredOrders */}
-              <div className="text-2xl font-bold">{filteredOrders.filter(o => o.estadoOrden === "pendiente").length}</div>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Pendientes</p>
+                  <p className="text-3xl font-bold text-yellow-600">{stats.pendientes}</p>
+                </div>
+                <Clock className="w-8 h-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Confirmadas</p>
+                  <p className="text-3xl font-bold text-green-600">{stats.confirmadas}</p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Atrasadas</p>
+                  <p className="text-3xl font-bold text-red-600">{stats.atrasadas}</p>
+                </div>
+                <AlertCircle className="w-8 h-8 text-red-500" />
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <Card>
+        {/* Filtro de Fechas */}
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Órdenes de Compra</CardTitle>
-            <CardDescription>Visualiza tus pedidos agrupados por consecutivo</CardDescription>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="space-y-2">
-                <Label>Desde</Label>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Hasta</Label>
-                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </div>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Filtrar por Fechas
+            </CardTitle>
+            <CardDescription>Selecciona un rango de fechas para filtrar tus ordenes</CardDescription>
           </CardHeader>
           <CardContent>
-            {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
-            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="startDate">Fecha Inicial</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endDate">Fecha Final</Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <div className="flex items-end">
+                <Button className="w-full" disabled={!startDate || !endDate}>
+                  Filtrar
+                </Button>
+              </div>
+            </div>
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Tabla de Órdenes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              Ordenes de Compra
+            </CardTitle>
+            <CardDescription>
+              Mostrando {filteredOrders.length} de {orders.length} ordenes
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             {isLoading ? (
-              <div className="text-center py-12">
-                <Clock className="w-8 h-8 animate-spin mx-auto text-slate-300 mb-2" />
-                <p className="text-slate-500">Cargando información...</p>
+              <div className="flex items-center justify-center py-8">
+                <p className="text-slate-600">Cargando ordenes...</p>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-slate-600">No hay ordenes disponibles</p>
               </div>
             ) : (
-              <div className="border rounded-lg overflow-hidden bg-white">
+              <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50">
+                  <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[150px]">Consecutivo</TableHead>
+                      <TableHead>Consecutivo</TableHead>
                       <TableHead>Fecha</TableHead>
                       <TableHead className="text-right">Valor Total</TableHead>
                       <TableHead>Estado</TableHead>
@@ -163,75 +273,54 @@ export default function ProviderDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredOrders.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-10 text-slate-500">No se encontraron registros</TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredOrders.map((order: any) => (
-                        <TableRow key={order.consecutivo} className={isOrderLate(order) ? "bg-red-50/50" : "hover:bg-slate-50/80 transition-colors"}>
-                          <TableCell className="font-bold text-blue-700">
-                            {order.consecutivo}
-                            <div className="text-[10px] text-slate-400 font-normal">
-                              {order.items.length} {order.items.length === 1 ? 'ítem' : 'ítems'}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-slate-600">
-                            {format(new Date(order.fecha), "dd/MM/yyyy")}
-                          </TableCell>
-                          <TableCell className="text-right font-bold text-slate-900">
-                            ${order.valorTotal.toLocaleString("es-CO")}
-                          </TableCell>
-                          <TableCell>{getStatusBadge(order.estadoOrden)}</TableCell>
-                          <TableCell>
-                            {order.fechaEstimadaEntrega ? (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-3 h-3 text-slate-400" />
-                                <span className="text-sm">{format(new Date(order.fechaEstimadaEntrega), "dd/MM/yyyy")}</span>
-                                {isOrderLate(order) && (
-                                  <Badge className="bg-red-500 text-white text-[9px] px-1 h-4 border-none">ATRASADA</Badge>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-slate-400 text-xs italic">Pendiente definir</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              {order.estadoOrden === "pendiente" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    className="h-8 bg-green-600 hover:bg-green-700"
-                                    onClick={() => handleConfirm(order.id)}
-                                    disabled={confirmMutation.isPending}
-                                  >
-                                    <CheckCircle className="w-3.5 h-3.5 mr-1" /> Confirmar
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    className="h-8"
-                                    onClick={() => handleReject(order.id)}
-                                    disabled={rejectMutation.isPending}
-                                  >
-                                    <XCircle className="w-3.5 h-3.5 mr-1" /> Rechazar
-                                  </Button>
-                                </>
+                    {filteredOrders.map((order: any) => (
+                      <TableRow key={order.id} className={isOrderLate(order) ? "bg-red-50" : ""}>
+                        <TableCell className="font-medium">{order.consecutivo}</TableCell>
+                        <TableCell>{format(new Date(order.fecha), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          ${parseFloat(order.valorTotal).toLocaleString("es-CO")}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(order.estadoOrden)}</TableCell>
+                        <TableCell>
+                          {order.fechaEstimadaEntrega ? (
+                            <div className="flex items-center gap-2">
+                              <span>{format(new Date(order.fechaEstimadaEntrega), "dd/MM/yyyy")}</span>
+                              {isOrderLate(order) && (
+                                <Badge className="bg-red-100 text-red-800">Atrasada</Badge>
                               )}
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="h-8"
-                                onClick={() => setLocation(`/provider/order/${order.consecutivo}`)}
-                              >
-                                Ver Detalles
-                              </Button>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                          ) : (
+                            <span className="text-slate-400">Sin fecha</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                          {order.estadoOrden === "pendiente" && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleConfirm(order.id)}
+                                disabled={confirmMutation.isPending}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Confirmar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleReject(order.id)}
+                                disabled={rejectMutation.isPending}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Rechazar
+                              </Button>
+                            </>
+                          )}
+                          <Button size="sm" variant="outline" onClick={() => setLocation(`/provider/order/${order.id}`)}>
+                            Ver Detalles
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
@@ -242,3 +331,4 @@ export default function ProviderDashboard() {
     </div>
   );
 }
+
