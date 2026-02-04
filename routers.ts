@@ -15,6 +15,7 @@ import {
   updateOrderStatus,
   getOrderAttachments,
   getOrderItems,
+  getOrderItemsByConsecutivo,
   getOrderConfirmationHistory,
   createConfirmation,
   createAttachment,
