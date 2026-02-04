@@ -3,25 +3,35 @@ import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
-// 1. Apuntamos directamente a los archivos index dentro de las carpetas en la raíz
 import { appRouter } from "./routers"; 
 import { createContext } from "./context";
-// 2. Apuntamos al scheduler en la raíz
 import { startScheduler } from "./scheduler";
 import cookieParser from "cookie-parser";
-// ...
+import cors from "cors"; // 🚀 Importante: Necesitas instalar 'npm install cors'
 
 async function startServer() {
   const app = express();
+  
+  // 1. Configuración de confianza para Proxies (Render usa uno)
   app.set("trust proxy", 1);
-  app.use(cookieParser()); // Esto le pone los lentes al servidor para ver las cookies
-  const server = createServer(app);
 
+  // 2. Configuración de CORS (Permite que los Headers y Cookies pasen)
+  app.use(cors({
+    origin: true, // En producción puedes poner tu URL específica https://portal-oc.onrender.com
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    methods: ["GET", "POST", "OPTIONS"],
+  }));
+
+  // 3. Middlewares base
+  app.use(cookieParser()); 
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+  // 4. Rutas de OAuth
   registerOAuthRoutes(app);
 
+  // 5. Middleware de tRPC
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -32,21 +42,22 @@ async function startServer() {
 
   /**
    * MANEJO DINÁMICO DE VITE
-   * Si 'vite.ts' está en la raíz junto a este index.ts, usamos './vite.ts'
    */
   if (process.env.NODE_ENV === "development") {
     const { setupVite } = await import("./vite.ts");
     await setupVite(app, server);
   } else {
+    // Servir archivos estáticos del build de Vite
     const { serveStatic } = await import("./vite.ts");
     serveStatic(app);
   }
 
+  const server = createServer(app);
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
   server.listen(port, "0.0.0.0", () => {
     console.log(`🚀 Servidor listo en puerto ${port}`);
-    console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Entorno: ${process.env.NODE_ENV || 'production'}`);
     
     startScheduler();
   });
@@ -56,6 +67,7 @@ startServer().catch((err) => {
   console.error("❌ Error al iniciar el servidor:", err);
 });
 
+// Manejo de señales de cierre
 process.on("SIGTERM", () => {
   console.log("[Server] SIGTERM recibido, cerrando servidor...");
   process.exit(0);
