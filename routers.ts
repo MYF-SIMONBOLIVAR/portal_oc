@@ -284,6 +284,16 @@ export const appRouter = router({
         return await getAllOrders(input.limit, input.offset);
       }),
 
+      getDetailsByConsecutivo: publicProcedure
+      .input(
+        z.object({ 
+          consecutivo: z.string() 
+        })
+      )
+      .query(async ({ input }) => {
+        return await getOrderItemsByConsecutivo(input.consecutivo);
+      }),
+
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
