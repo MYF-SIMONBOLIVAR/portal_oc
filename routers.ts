@@ -256,7 +256,7 @@ export const appRouter = router({
             uploadedBy: input.providerId,
           });
         return { success: true, message: "Archivo cargado exitosamente" };
-      }), // 1. Cierra el .mutation de upload
+      }) // 1. Cierra el .mutation de upload
   }      // 2. Cierra el objeto 'attachments' (OJO: SIN PUNTO Y COMA AQUÍ)
 });      // 3. Cierra el router principal
 
