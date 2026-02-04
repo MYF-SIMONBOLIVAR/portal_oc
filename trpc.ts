@@ -4,25 +4,22 @@ import type { AppRouter } from "./routers";
 export const trpc = createTRPCReact<AppRouter>();
 
 export const client = trpc.createClient({
+ // src/trpc.ts
   links: [
     httpBatchLink({
       url: "/api/trpc",
       async fetch(url, options) {
-        // 🚀 FORZAMOS LA LECTURA DIRECTA
-        const token = window.localStorage.getItem("providerToken");
+        // 🚀 CAMBIO VITAL: Usa 'providerToken', NO 'providerId'
+        const token = localStorage.getItem("providerToken"); 
         
-        const modifiedOptions = {
+        return fetch(url, {
           ...options,
-          credentials: "include" as const,
+          credentials: "include",
           headers: {
             ...options.headers,
-            // Si hay token, lo mandamos. Si no, mandamos string vacío.
-            "Authorization": token ? `Bearer ${token}` : "",
+            Authorization: token ? `Bearer ${token}` : "",
           },
-        };
-        
-        console.log("[tRPC Client] Enviando petición con token:", !!token);
-        return fetch(url, modifiedOptions);
+        });
       },
     }),
   ],
