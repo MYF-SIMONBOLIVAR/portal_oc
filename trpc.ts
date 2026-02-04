@@ -10,7 +10,7 @@ export const client = trpc.createClient({
     httpBatchLink({
     url: "/api/trpc",
     async fetch(url, options) {
-      const token = localStorage.getItem("portal_token");
+      const token = localStorage.getItem("providerToken");
       return fetch(url, {
         ...options,
         credentials: "include", // Para cookies (si funcionan)
