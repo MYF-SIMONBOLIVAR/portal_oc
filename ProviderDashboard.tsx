@@ -31,10 +31,26 @@ export default function ProviderDashboard() {
     setProviderName(name);
   }, [setLocation]);
 
-  const { data: orders = [], isLoading, refetch } = trpc.orders.myOrders.useQuery(
+  // Traemos los datos (rawOrders)
+  const { data: rawOrders = [], isLoading, refetch } = trpc.orders.myOrders.useQuery(
     { providerId: providerId || 0 },
     { enabled: !!providerId }
   );
+
+  // --- INICIO AJUSTE DE AGRUPACIÓN ---
+  const orders = useMemo(() => {
+    return rawOrders.reduce((acc: any[], current: any) => {
+      const existingOrder = acc.find(o => o.consecutivo === current.consecutivo);
+      if (existingOrder) {
+        // Sumamos el valor total si el consecutivo se repite
+        existingOrder.valorTotal = (parseFloat(existingOrder.valorTotal) + parseFloat(current.valorTotal)).toString();
+      } else {
+        acc.push({ ...current });
+      }
+      return acc;
+    }, []);
+  }, [rawOrders]);
+  // --- FIN AJUSTE DE AGRUPACIÓN ---
 
   const confirmMutation = trpc.orders.confirm.useMutation({
     onSuccess: () => {
@@ -75,7 +91,6 @@ export default function ProviderDashboard() {
     });
   }, [orders, startDate, endDate]);
 
-  // Calcular estadísticas
   const stats = useMemo(() => {
     const today = startOfDay(new Date());
     let pendientes = 0;
@@ -103,7 +118,6 @@ export default function ProviderDashboard() {
 
   const handleReject = (orderId: number) => {
     if (!providerId) return;
-    // Nota: Aquí usamos el mismo endpoint de confirm, pero en el futuro podría haber un endpoint específico para rechazar
     rejectMutation.mutate({ orderId, providerId });
   };
 
@@ -156,7 +170,6 @@ export default function ProviderDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Resumen de Estados */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
             <CardContent className="pt-6">
@@ -195,7 +208,6 @@ export default function ProviderDashboard() {
           </Card>
         </div>
 
-        {/* Filtro de Fechas */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -239,7 +251,6 @@ export default function ProviderDashboard() {
           </CardContent>
         </Card>
 
-        {/* Tabla de Órdenes */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -274,7 +285,7 @@ export default function ProviderDashboard() {
                   </TableHeader>
                   <TableBody>
                     {filteredOrders.map((order: any) => (
-                      <TableRow key={order.id} className={isOrderLate(order) ? "bg-red-50" : ""}>
+                      <TableRow key={order.consecutivo} className={isOrderLate(order) ? "bg-red-50" : ""}>
                         <TableCell className="font-medium">{order.consecutivo}</TableCell>
                         <TableCell>{format(new Date(order.fecha), "dd/MM/yyyy")}</TableCell>
                         <TableCell className="text-right font-semibold">
@@ -315,7 +326,7 @@ export default function ProviderDashboard() {
                               </Button>
                             </>
                           )}
-                          <Button size="sm" variant="outline" onClick={() => setLocation(`/provider/order/${order.id}`)}>
+                          <Button size="sm" variant="outline" onClick={() => setLocation(`/provider/order/${order.consecutivo}`)}>
                             Ver Detalles
                           </Button>
                         </TableCell>
@@ -331,4 +342,3 @@ export default function ProviderDashboard() {
     </div>
   );
 }
-
