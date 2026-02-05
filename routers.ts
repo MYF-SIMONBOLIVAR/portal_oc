@@ -445,8 +445,9 @@ export const appRouter = router({
           consecutivo: input.consecutivo,
           numeroGuia: input.numeroGuia,
           numeroFactura: input.numeroFactura,
-        });
-      }),
+        }),
+      });
+    
 
   admin: router({
     getAllProviders: publicProcedure
