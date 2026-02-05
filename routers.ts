@@ -447,7 +447,6 @@ export const appRouter = router({
           numeroFactura: input.numeroFactura,
         });
       }),
-  }),
 
   admin: router({
     getAllProviders: publicProcedure
