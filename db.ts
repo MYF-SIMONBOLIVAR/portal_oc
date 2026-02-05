@@ -263,11 +263,22 @@ export async function getOrderItemsByConsecutivo(consecutivo: string) {
   const db = await getDb();
   if (!db) return [];
 
+  // 🔗 Hacemos un JOIN entre orderItems y purchaseOrders
   return await db
-    .select()
+    .select({
+      id: orderItems.id,
+      referencia: orderItems.referencia,
+      descripcion: orderItems.descripcion,
+      cantidad: orderItems.cantidad,
+      precioUnitario: orderItems.precioUnitario,
+      valorTotal: orderItems.valorTotal,
+    })
     .from(orderItems)
-    // ⚠️ REVISA ESTA LÍNEA: 'orderItems.consecutivo' debe existir en tu schema.ts
-    .where(eq(orderItems.consecutivo, consecutivo)); 
+    .innerJoin(
+      purchaseOrders, 
+      eq(orderItems.purchaseOrderId, purchaseOrders.id) // Unión por ID numérico
+    )
+    .where(eq(purchaseOrders.consecutivo, consecutivo)); // Filtro por el texto "00012"
 }
 
 export async function createAttachment(data: {
