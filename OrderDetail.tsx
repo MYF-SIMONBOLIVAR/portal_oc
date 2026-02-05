@@ -15,7 +15,7 @@ export default function OrderDetail() {
   
   // 1. IMPORTANTE: El nombre aquí debe ser idéntico al de App.tsx (:consecutivo)
   const [match, params] = useRoute("/provider/order/:consecutivo");
-  const consecutivo = params?.consecutivo;
+  const routeConsecutivo = params?.consecutivo;
   
   const [providerId, setProviderId] = useState<number | null>(null);
   const [order, setOrder] = useState<any>(null);
@@ -35,26 +35,24 @@ export default function OrderDetail() {
 
   // 2. Llamamos al procedimiento que configuramos en el backend usando el consecutivo
   const { data: orderData, isLoading, error: queryError } = trpc.orders.getDetailsByConsecutivo.useQuery(
-    { consecutivo: consecutivo || "" },
+    { consecutivo: routeConsecutivo || "" },
     { 
-      enabled: !!consecutivo,
+      enabled: !!routeConsecutivo,
       keepPreviousData: false 
     }
   );
 
   useEffect(() => {
     if (orderData) {
-      // Asumimos que orderData contiene la información de la orden y sus items
-      // Si el backend devuelve un objeto con { order, items }, ajustamos aquí.
-      // Basado en el código 1, 'items' es el resultado directo.
-      // Sin embargo, el código 2 espera un objeto 'order' con propiedades.
-      // Si getDetailsByConsecutivo devuelve la lista de items, necesitamos la orden también.
-      // Ajustaremos para que 'order' sea el primer item o la data si contiene la info de la orden.
-      setOrder(orderData.order || orderData[0] || null);
+      // Ajustamos para que 'order' sea el objeto de la orden
+      const orderInfo = orderData.order || (Array.isArray(orderData) ? orderData[0] : orderData);
+      setOrder(orderInfo);
     }
   }, [orderData]);
 
   const orderId = order?.id || null;
+  // Usamos el consecutivo de la orden o el de la ruta como respaldo
+  const currentConsecutivo = order?.consecutivo || routeConsecutivo;
 
   // Consultas adicionales basadas en el ID de la orden obtenido
   const { data: attachmentsData } = trpc.orders.getAttachments.useQuery(
@@ -90,7 +88,8 @@ export default function OrderDetail() {
 
   const updateGuiaFacturaMutation = trpc.orders.updateGuiaAndFactura.useMutation({
     onSuccess: (data) => {
-      setOrder(data);
+      // Actualizamos el estado local con los nuevos datos devueltos
+      if (data) setOrder(data);
       setError("");
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 5000);
@@ -110,12 +109,12 @@ export default function OrderDetail() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        <p className="text-slate-600 font-medium">Cargando productos de la orden {consecutivo}...</p>
+        <p className="text-slate-600 font-medium">Cargando productos de la orden {routeConsecutivo}...</p>
       </div>
     );
   }
 
-  if (queryError || !match || !consecutivo || !providerId) {
+  if (queryError || !match || !routeConsecutivo || !providerId) {
     return (
       <div className="p-8 text-center">
         <div className="bg-red-50 text-red-800 p-4 rounded-lg inline-block">
@@ -184,7 +183,7 @@ export default function OrderDetail() {
                   <div>
                     <CardTitle className="text-2xl font-black text-slate-900 flex items-center gap-2">
                       <Package className="text-blue-600 w-8 h-8" />
-                      Orden # {consecutivo}
+                      Orden # {currentConsecutivo}
                     </CardTitle>
                     <CardDescription>{order.referencia || "Desglose de productos asociados a este consecutivo"}</CardDescription>
                   </div>
@@ -402,10 +401,13 @@ export default function OrderDetail() {
                 </div>
                 <Button
                   onClick={() => {
-                    if (!providerId || !orderId) return;
+                    if (!providerId || !currentConsecutivo) {
+                      setError("Falta información de la orden o proveedor");
+                      return;
+                    }
                     setShowSuccess(false);
                     updateGuiaFacturaMutation.mutate({
-                      orderId,
+                      consecutivo: String(currentConsecutivo), // Aseguramos que sea string y no undefined
                       providerId,
                       numeroGuia: order.numeroGuia || null,
                       numeroFactura: order.numeroFactura || null,
