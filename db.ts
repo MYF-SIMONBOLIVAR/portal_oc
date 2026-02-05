@@ -512,22 +512,24 @@ export async function deleteProvider(providerId: number) {
 }
 
 
-export async function updateOrderGuiaAndFactura(
-  orderId: number,
-  numeroGuia: string | null,
-  numeroFactura: string | null
-) {
+export async function updateOrderGuiaAndFactura(data: {
+  consecutivo: string; // Cambiamos id por consecutivo
+  numeroGuia: string | null;
+  numeroFactura: string | null;
+}) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) return;
 
-  await db
-    .update(purchaseOrders)
+  // Actualizamos TODOS los registros que tengan ese consecutivo
+  await db.update(purchaseOrders)
     .set({
-      numeroGuia: numeroGuia || null,
-      numeroFactura: numeroFactura || null,
+      numeroGuia: data.numeroGuia,
+      numeroFactura: data.numeroFactura,
       updatedAt: new Date(),
     })
-    .where(eq(purchaseOrders.id, orderId));
+    .where(eq(purchaseOrders.consecutivo, data.consecutivo));
 
-  return getOrderById(orderId);
+  // Devolvemos el primero para que el frontend se actualice
+  const results = await db.select().from(purchaseOrders).where(eq(purchaseOrders.consecutivo, data.consecutivo)).limit(1);
+  return results[0];
 }
