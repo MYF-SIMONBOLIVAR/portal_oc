@@ -442,11 +442,12 @@ export const appRouter = router({
 
       // 2. Llamamos a la nueva función de DB que actualiza masivamente
       return await updateOrderGuiaAndFactura({
-        consecutivo: input.consecutivo,
-        numeroGuia: input.numeroGuia,
-        numeroFactura: input.numeroFactura,
-      });
-    }),
+          consecutivo: input.consecutivo,
+          numeroGuia: input.numeroGuia,
+          numeroFactura: input.numeroFactura,
+        });
+      }),
+  }),
 
   admin: router({
     getAllProviders: publicProcedure
