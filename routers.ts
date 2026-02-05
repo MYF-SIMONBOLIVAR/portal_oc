@@ -706,6 +706,8 @@ export const appRouter = router({
       }),
   }),
 
+    
+  
   sync: router({
     syncSiesaManual: publicProcedure.mutation(async () => {
       try {
@@ -721,6 +723,6 @@ export const appRouter = router({
       }
     }),
   }),
-});
+}); // Este cierra el "export const appRouter = router({" inicial
 
 export type AppRouter = typeof appRouter;
