@@ -266,7 +266,7 @@ export async function getOrderItemsByConsecutivo(consecutivo: string) {
   return await db
     .select()
     .from(orderItems)
-    // Usamos el campo 'consecutivo' de la tabla OrderItem
+    // ⚠️ REVISA ESTA LÍNEA: 'orderItems.consecutivo' debe existir en tu schema.ts
     .where(eq(orderItems.consecutivo, consecutivo)); 
 }
 
