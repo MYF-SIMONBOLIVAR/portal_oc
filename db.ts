@@ -263,7 +263,7 @@ export async function getOrderItemsByConsecutivo(consecutivo: string) {
   const db = await getDb();
   if (!db) return [];
 
-  // 🔗 Hacemos un JOIN entre orderItems y purchaseOrders
+  // Realizamos un JOIN para buscar items basados en el consecutivo de la orden madre
   return await db
     .select({
       id: orderItems.id,
@@ -276,11 +276,10 @@ export async function getOrderItemsByConsecutivo(consecutivo: string) {
     .from(orderItems)
     .innerJoin(
       purchaseOrders, 
-      eq(orderItems.purchaseOrderId, purchaseOrders.id) // Unión por ID numérico
+      eq(orderItems.purchaseOrderId, purchaseOrders.id)
     )
-    .where(eq(purchaseOrders.consecutivo, consecutivo)); // Filtro por el texto "00012"
+    .where(eq(purchaseOrders.consecutivo, consecutivo));
 }
-
 export async function createAttachment(data: {
   purchaseOrderId: number;
   tipoArchivo: "factura" | "guia_despacho";
