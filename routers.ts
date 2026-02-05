@@ -422,31 +422,31 @@ export const appRouter = router({
       }),
 
     updateGuiaAndFactura: publicProcedure
-      .input(
-        z.object({
-          orderId: z.number(),
-          providerId: z.number(),
-          numeroGuia: z.string().optional().nullable(),
-          numeroFactura: z.string().optional().nullable(),
-        })
-      )
-      .mutation(async ({ input }) => {
-        const order = await getOrderById(input.orderId);
-        if (!order) {
-          throw new Error("Orden no encontrada");
-        }
+    .input(
+      z.object({
+        // Cambiamos orderId por consecutivo
+        consecutivo: z.string(), 
+        providerId: z.number(),
+        numeroGuia: z.string().optional().nullable(),
+        numeroFactura: z.string().optional().nullable(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // 1. Verificamos que al menos uno de los registros pertenezca al proveedor
+      // Usamos el nuevo método de búsqueda por consecutivo que creamos
+      const items = await getOrderItemsByConsecutivo(input.consecutivo);
+      
+      if (items.length === 0) {
+        throw new Error("Orden no encontrada");
+      }
 
-        if (order.providerId !== input.providerId) {
-          throw new Error("No autorizado");
-        }
-
-        return await updateOrderGuiaAndFactura(
-          input.orderId,
-          input.numeroGuia || null,
-          input.numeroFactura || null
-        );
-      }),
-  }),
+      // 2. Llamamos a la nueva función de DB que actualiza masivamente
+      return await updateOrderGuiaAndFactura({
+        consecutivo: input.consecutivo,
+        numeroGuia: input.numeroGuia,
+        numeroFactura: input.numeroFactura,
+      });
+    }),
 
   admin: router({
     getAllProviders: publicProcedure
