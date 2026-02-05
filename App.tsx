@@ -22,7 +22,7 @@ function AppRoutes() {
       
       {/*  Rutas de Proveedor */}
       <Route path={"/provider/dashboard"} component={ProviderDashboard} />
-      <Route path={"/provider/order/:id"} component={OrderDetail} />
+      <Route path={"/provider/order/:consecutivo"} component={OrderDetail} />
 
       {/*  Rutas Protegidas de Administrador */}
       <Route path="/admin/dashboard">
