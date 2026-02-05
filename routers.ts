@@ -421,7 +421,7 @@ export const appRouter = router({
         return { success: true, order: await getOrderById(input.orderId) };
       }),
 
-    updateGuiaAndFactura: publicProcedure
+   updateGuiaAndFactura: publicProcedure
   .input(
     z.object({
       consecutivo: z.string(), 
@@ -444,7 +444,8 @@ export const appRouter = router({
       numeroGuia: input.numeroGuia,
       numeroFactura: input.numeroFactura,
     });
-  }), 
+  }),
+}),
     
   admin: router({
     getAllProviders: publicProcedure
