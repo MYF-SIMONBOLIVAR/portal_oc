@@ -444,10 +444,9 @@ export const appRouter = router({
         consecutivo: input.consecutivo,
         numeroGuia: input.numeroGuia,
         numeroFactura: input.numeroFactura,
-      }); // Antes había un }), extra aquí
+      }); //
     }), // Cierre de la mutación
     
-
   admin: router({
     getAllProviders: publicProcedure
       .query(async () => {
@@ -705,10 +704,7 @@ export const appRouter = router({
         };
       }),
   }),
-
-    
-  
-  sync: router({
+    sync: router({
     syncSiesaManual: publicProcedure.mutation(async () => {
       try {
         const { syncSiesaOrders } = await import("./workers/siesaSyncWorker");
@@ -723,6 +719,7 @@ export const appRouter = router({
       }
     }),
   }),
-}); // Este cierra el "export const appRouter = router({" inicial
+});
 
 export type AppRouter = typeof appRouter;
+
