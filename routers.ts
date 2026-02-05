@@ -422,30 +422,29 @@ export const appRouter = router({
       }),
 
     updateGuiaAndFactura: publicProcedure
-    .input(
-      z.object({
-        consecutivo: z.string(), 
-        providerId: z.number(),
-        numeroGuia: z.string().optional().nullable(),
-        numeroFactura: z.string().optional().nullable(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      // 1. Verificamos que al menos uno de los registros pertenezca al proveedor
-      const items = await getOrderItemsByConsecutivo(input.consecutivo);
-      
-      if (items.length === 0) {
-        throw new Error("Orden no encontrada");
-      }
-      
-      // 2. Llamamos a la nueva función de DB que actualiza masivamente
-      // CORRECCIÓN: Se eliminó el paréntesis de cierre extra y la coma innecesaria
-      return await updateOrderGuiaAndFactura({
-        consecutivo: input.consecutivo,
-        numeroGuia: input.numeroGuia,
-        numeroFactura: input.numeroFactura,
-      }); //
-    }), // Cierre de la mutación
+  .input(
+    z.object({
+      consecutivo: z.string(), 
+      providerId: z.number(),
+      numeroGuia: z.string().optional().nullable(),
+      numeroFactura: z.string().optional().nullable(),
+    })
+  )
+  .mutation(async ({ input }) => {
+    // 1. Verificamos que al menos uno de los registros pertenezca al proveedor
+    const items = await getOrderItemsByConsecutivo(input.consecutivo);
+    
+    if (items.length === 0) {
+      throw new Error("Orden no encontrada");
+    }
+    
+    // 2. Llamamos a la nueva función de DB que actualiza masivamente
+    return await updateOrderGuiaAndFactura({
+      consecutivo: input.consecutivo,
+      numeroGuia: input.numeroGuia,
+      numeroFactura: input.numeroFactura,
+    });
+  }), 
     
   admin: router({
     getAllProviders: publicProcedure
