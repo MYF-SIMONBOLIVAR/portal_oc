@@ -424,7 +424,6 @@ export const appRouter = router({
     updateGuiaAndFactura: publicProcedure
     .input(
       z.object({
-        // Cambiamos orderId por consecutivo
         consecutivo: z.string(), 
         providerId: z.number(),
         numeroGuia: z.string().optional().nullable(),
@@ -433,20 +432,20 @@ export const appRouter = router({
     )
     .mutation(async ({ input }) => {
       // 1. Verificamos que al menos uno de los registros pertenezca al proveedor
-      // Usamos el nuevo método de búsqueda por consecutivo que creamos
       const items = await getOrderItemsByConsecutivo(input.consecutivo);
       
       if (items.length === 0) {
         throw new Error("Orden no encontrada");
       }
-
+      
       // 2. Llamamos a la nueva función de DB que actualiza masivamente
+      // CORRECCIÓN: Se eliminó el paréntesis de cierre extra y la coma innecesaria
       return await updateOrderGuiaAndFactura({
-      consecutivo: input.consecutivo,
-      numeroGuia: input.numeroGuia,
-      numeroFactura: input.numeroFactura,
-    }); // Antes había un }), extra aquí
-  }),
+        consecutivo: input.consecutivo,
+        numeroGuia: input.numeroGuia,
+        numeroFactura: input.numeroFactura,
+      }); // Antes había un }), extra aquí
+    }), // Cierre de la mutación
     
 
   admin: router({
