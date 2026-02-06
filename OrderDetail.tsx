@@ -240,10 +240,10 @@ export default function OrderDetail() {
               <TableHead className="pl-6 text-slate-500 font-bold">Referencia</TableHead>
               <TableHead className="text-slate-500 font-bold">Descripción</TableHead>
               <TableHead className="text-center text-slate-500 font-bold">Cant.</TableHead>
-              <TableHead className="text-right text-slate-500 font-bold">Precio Unitario</TableHead>
-              <TableHead className="text-right text-slate-500 font-bold">Total Bruto</TableHead>
+              <TableHead className="text-right text-slate-500 font-bold">Precio Un</TableHead>
+              <TableHead className="text-right text-slate-500 font-bold">Tl Bruto</TableHead>
               <TableHead className="text-right text-slate-500 font-bold">Impuestos</TableHead>
-              <TableHead className="text-right pr-6 text-slate-500 font-bold">Total Neto</TableHead>
+              <TableHead className="text-right pr-6 text-slate-500 font-bold">Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -296,7 +296,7 @@ export default function OrderDetail() {
           </span>
         </div>
         <div className="text-right">
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[2px] mb-1">Total Consolidado</p>
+          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[2px] mb-1">Total</p>
           <p className="text-4xl font-black text-slate-900 tracking-tighter">
             ${items.reduce((acc: number, item: any) => acc + Number(item.valorTotal || 0), 0).toLocaleString("es-CO")}
           </p>
