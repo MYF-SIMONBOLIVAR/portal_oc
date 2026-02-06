@@ -54,7 +54,7 @@ export async function processPendingWhatsAppNotifications() {
         const success = await sendWhatsAppNotification({
           numero_telefonico: provider.celular,
           proveedor: provider.razonSocial,
-          url: "https://repuestossimonbolivar.com/",
+          url: "https://portal-oc.onrender.com/",
           orden_numero: ordenNumero,
         });
 
@@ -95,4 +95,5 @@ export async function processPendingWhatsAppNotifications() {
     console.error("[WhatsAppWorker] Error crítico en el proceso de notificaciones:", error);
   }
 }
+
 
