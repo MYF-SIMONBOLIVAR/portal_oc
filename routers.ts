@@ -346,7 +346,7 @@ export const appRouter = router({
             consecutivo: order.consecutivo,
             proveedor: provider.razonSocial,
             url: "http://repuestossimonbolivar.com",
-            celular: "3233315933" // Número compras fijo
+            celular: "3506325984" // Número compras fijo
           });
           console.log(`[WhatsApp] Notificación enviada para la orden ${order.consecutivo}`);
         } catch (wsError) {
