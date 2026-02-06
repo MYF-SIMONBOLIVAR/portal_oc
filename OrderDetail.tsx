@@ -222,8 +222,9 @@ export default function OrderDetail() {
             </Card>
 
            <Card className="shadow-md border-none overflow-hidden">
+  <Card className="shadow-md border-none overflow-hidden">
   <CardHeader className="bg-slate-50/50 border-b">
-    <CardTitle>Productos</CardTitle>
+    <CardTitle className="text-slate-700 text-lg font-bold">Productos</CardTitle>
   </CardHeader>
   <CardContent className="p-0">
     {items.length === 0 ? (
@@ -236,37 +237,36 @@ export default function OrderDetail() {
         <Table>
           <TableHeader className="bg-slate-50/50">
             <TableRow>
-              <TableHead className="pl-6"><Hash className="w-4 h-4 inline mr-1" /> Referencia</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead className="text-center">Cantidad.</TableHead>
-              <TableHead className="text-right">Precio Unitario</TableHead>
-              <TableHead className="text-right">Total bruto</TableHead>
-              <TableHead className="text-right">Impuestos.</TableHead>
-              <TableHead className="text-right pr-6"><DollarSign className="w-4 h-4 inline mr-1" /> Total</TableHead>
+              <TableHead className="pl-6 text-slate-500 font-bold">Referencia</TableHead>
+              <TableHead className="text-slate-500 font-bold">Descripción</TableHead>
+              <TableHead className="text-center text-slate-500 font-bold">Cant.</TableHead>
+              <TableHead className="text-right text-slate-500 font-bold">Precio Unitario</TableHead>
+              <TableHead className="text-right text-slate-500 font-bold">Total Bruto</TableHead>
+              <TableHead className="text-right text-slate-500 font-bold">Impuestos</TableHead>
+              <TableHead className="text-right pr-6 text-slate-500 font-bold">Total Neto</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.map((item: any, index: number) => (
-              <TableRow key={item.id || index} className="hover:bg-slate-50 transition-colors border-b last:border-0">
+              <TableRow key={item.id || index} className="hover:bg-blue-50/30 transition-colors border-b last:border-0">
                 <TableCell className="font-bold pl-6 text-blue-600">{item.referencia}</TableCell>
                 <TableCell className="text-slate-700 font-medium">{item.descripcion}</TableCell>
                 <TableCell className="text-center">
-                  <span className="bg-slate-100 px-2 py-1 rounded text-sm font-bold">
-                    {item.cantidad}
+                  <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-sm font-bold border border-slate-200">
+                    {item.cantidad || 0}
                   </span>
                 </TableCell>
                 <TableCell className="text-right text-slate-600">
-                  ${Number(item.precioUnitario).toLocaleString("es-CO")}
+                  ${Number(item.precioUnitario || 0).toLocaleString("es-CO")}
                 </TableCell>
-                {/* NUEVAS COLUMNAS POR FILA */}
-                <TableCell className="text-right text-slate-600">
-                  ${Number(item.valorBruto).toLocaleString("es-CO")}
+                <TableCell className="text-right text-slate-600 font-medium">
+                  ${Number(item.valorBruto || 0).toLocaleString("es-CO")}
                 </TableCell>
-                <TableCell className="text-right text-orange-600">
-                  ${Number(item.impuestos).toLocaleString("es-CO")}
+                <TableCell className="text-right text-orange-600 font-medium">
+                  ${Number(item.impuestos || 0).toLocaleString("es-CO")}
                 </TableCell>
-                <TableCell className="text-right font-black pr-6 text-slate-900">
-                  ${Number(item.valorTotal).toLocaleString("es-CO")}
+                <TableCell className="text-right font-bold pr-6 text-slate-900">
+                  ${Number(item.valorTotal || 0).toLocaleString("es-CO")}
                 </TableCell>
               </TableRow>
             ))}
@@ -276,23 +276,29 @@ export default function OrderDetail() {
     )}
     
     {items.length > 0 && (
-      <div className="p-6 bg-slate-900 text-white flex flex-col items-end gap-2">
-        <div className="flex justify-between w-full max-w-[300px] text-slate-400 text-sm">
+      <div className="p-8 bg-white border-t border-slate-100 flex flex-col items-end gap-1">
+        <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm">
           <span>Total Bruto:</span>
-          <span>${items.reduce((acc: number, item: any) => acc + Number(item.valorBruto), 0).toLocaleString("es-CO")}</span>
+          <span className="font-medium text-slate-700">
+            ${items.reduce((acc: number, item: any) => acc + Number(item.valorBruto || 0), 0).toLocaleString("es-CO")}
+          </span>
         </div>
-        <div className="flex justify-between w-full max-w-[300px] text-orange-400 text-sm">
+        <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm">
           <span>Total Impuestos:</span>
-          <span>+ ${items.reduce((acc: number, item: any) => acc + Number(item.impuestos), 0).toLocaleString("es-CO")}</span>
+          <span className="font-medium text-orange-600">
+            + ${items.reduce((acc: number, item: any) => acc + Number(item.impuestos || 0), 0).toLocaleString("es-CO")}
+          </span>
         </div>
-        <div className="flex justify-between w-full max-w-[300px] text-green-400 text-sm border-b border-slate-700 pb-2">
+        <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm border-b border-slate-100 pb-3 mb-1">
           <span>Dscto Global:</span>
-          <span>- ${items.reduce((acc: number, item: any) => acc + Number(item.descuentoGlobal || 0), 0).toLocaleString("es-CO")}</span>
+          <span className="font-medium text-green-600">
+            - ${items.reduce((acc: number, item: any) => acc + Number(item.descuentoGlobal || 0), 0).toLocaleString("es-CO")}
+          </span>
         </div>
-        <div className="text-right mt-2">
-          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Total</p>
-          <p className="text-4xl font-black text-white">
-            ${items.reduce((acc: number, item: any) => acc + Number(item.valorTotal), 0).toLocaleString("es-CO")}
+        <div className="text-right">
+          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[2px] mb-1">Total Consolidado</p>
+          <p className="text-4xl font-black text-slate-900 tracking-tighter">
+            ${items.reduce((acc: number, item: any) => acc + Number(item.valorTotal || 0), 0).toLocaleString("es-CO")}
           </p>
         </div>
       </div>
