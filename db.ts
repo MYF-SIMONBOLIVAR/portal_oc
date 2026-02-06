@@ -271,6 +271,8 @@ export async function getOrderItemsByConsecutivo(consecutivo: string) {
       descripcion: orderItems.descripcion,
       cantidad: orderItems.cantidad,
       precioUnitario: orderItems.precioUnitario,
+      valorBruto: purchaseOrders.valorBruto,
+      impuestos: purchaseOrders.impuestos,
       valorTotal: orderItems.valorTotal,
     })
     .from(orderItems)
