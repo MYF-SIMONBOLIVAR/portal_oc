@@ -221,63 +221,84 @@ export default function OrderDetail() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md border-none overflow-hidden">
-              <CardHeader className="bg-slate-50/50 border-b">
-                <CardTitle>Productos</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {items.length === 0 ? (
-                  <div className="flex flex-col items-center gap-2 text-slate-400 py-20">
-                    <Package className="w-12 h-12 opacity-20" />
-                    <p>No hay productos vinculados a este número de orden.</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader className="bg-slate-50/50">
-                        <TableRow>
-                          <TableHead className="pl-6"><Hash className="w-4 h-4 inline mr-1" /> Referencia</TableHead>
-                          <TableHead>Descripción</TableHead>
-                          <TableHead className="text-center">Cant.</TableHead>
-                          <TableHead className="text-right">Precio Unitario</TableHead>
-                          <TableHead className="text-right pr-6"><DollarSign className="w-4 h-4 inline mr-1" /> Total</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {items.map((item: any, index: number) => (
-                          <TableRow key={item.id || index} className="hover:bg-slate-50 transition-colors border-b last:border-0">
-                            <TableCell className="font-bold pl-6 text-blue-600">{item.referencia}</TableCell>
-                            <TableCell className="text-slate-700 font-medium">{item.descripcion}</TableCell>
-                            <TableCell className="text-center">
-                              <span className="bg-slate-100 px-2 py-1 rounded text-sm font-bold">
-                                {item.cantidad}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-right text-slate-600">
-                              ${Number(item.precioUnitario).toLocaleString("es-CO")}
-                            </TableCell>
-                            <TableCell className="text-right font-black pr-6 text-slate-900">
-                              ${Number(item.valorTotal).toLocaleString("es-CO")}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-                
-                {items.length > 0 && (
-                  <div className="p-6 bg-slate-900 text-white flex justify-end">
-                    <div className="text-right">
-                      <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Total Consolidado</p>
-                      <p className="text-3xl font-black">
-                        ${items.reduce((acc: number, item: any) => acc + Number(item.valorTotal), 0).toLocaleString("es-CO")}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+           <Card className="shadow-md border-none overflow-hidden">
+  <CardHeader className="bg-slate-50/50 border-b">
+    <CardTitle>Productos</CardTitle>
+  </CardHeader>
+  <CardContent className="p-0">
+    {items.length === 0 ? (
+      <div className="flex flex-col items-center gap-2 text-slate-400 py-20">
+        <Package className="w-12 h-12 opacity-20" />
+        <p>No hay productos vinculados a este número de orden.</p>
+      </div>
+    ) : (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-slate-50/50">
+            <TableRow>
+              <TableHead className="pl-6"><Hash className="w-4 h-4 inline mr-1" /> Referencia</TableHead>
+              <TableHead>Descripción</TableHead>
+              <TableHead className="text-center">Cantidad.</TableHead>
+              <TableHead className="text-right">Precio Unitario</TableHead>
+              <TableHead className="text-right">Total bruto</TableHead>
+              <TableHead className="text-right">Impuestos.</TableHead>
+              <TableHead className="text-right pr-6"><DollarSign className="w-4 h-4 inline mr-1" /> Total</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item: any, index: number) => (
+              <TableRow key={item.id || index} className="hover:bg-slate-50 transition-colors border-b last:border-0">
+                <TableCell className="font-bold pl-6 text-blue-600">{item.referencia}</TableCell>
+                <TableCell className="text-slate-700 font-medium">{item.descripcion}</TableCell>
+                <TableCell className="text-center">
+                  <span className="bg-slate-100 px-2 py-1 rounded text-sm font-bold">
+                    {item.cantidad}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right text-slate-600">
+                  ${Number(item.precioUnitario).toLocaleString("es-CO")}
+                </TableCell>
+                {/* NUEVAS COLUMNAS POR FILA */}
+                <TableCell className="text-right text-slate-600">
+                  ${Number(item.valorBruto).toLocaleString("es-CO")}
+                </TableCell>
+                <TableCell className="text-right text-orange-600">
+                  ${Number(item.impuestos).toLocaleString("es-CO")}
+                </TableCell>
+                <TableCell className="text-right font-black pr-6 text-slate-900">
+                  ${Number(item.valorTotal).toLocaleString("es-CO")}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )}
+    
+    {items.length > 0 && (
+      <div className="p-6 bg-slate-900 text-white flex flex-col items-end gap-2">
+        <div className="flex justify-between w-full max-w-[300px] text-slate-400 text-sm">
+          <span>Total Bruto:</span>
+          <span>${items.reduce((acc: number, item: any) => acc + Number(item.valorBruto), 0).toLocaleString("es-CO")}</span>
+        </div>
+        <div className="flex justify-between w-full max-w-[300px] text-orange-400 text-sm">
+          <span>Total Impuestos:</span>
+          <span>+ ${items.reduce((acc: number, item: any) => acc + Number(item.impuestos), 0).toLocaleString("es-CO")}</span>
+        </div>
+        <div className="flex justify-between w-full max-w-[300px] text-green-400 text-sm border-b border-slate-700 pb-2">
+          <span>Dscto Global:</span>
+          <span>- ${items.reduce((acc: number, item: any) => acc + Number(item.descuentoGlobal || 0), 0).toLocaleString("es-CO")}</span>
+        </div>
+        <div className="text-right mt-2">
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Total</p>
+          <p className="text-4xl font-black text-white">
+            ${items.reduce((acc: number, item: any) => acc + Number(item.valorTotal), 0).toLocaleString("es-CO")}
+          </p>
+        </div>
+      </div>
+    )}
+  </CardContent>
+</Card>
 
             <Card>
               <CardHeader>
