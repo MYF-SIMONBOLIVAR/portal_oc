@@ -277,7 +277,7 @@ export default function ProviderDashboard() {
                     <TableRow>
                       <TableHead>Consecutivo</TableHead>
                       <TableHead>Fecha</TableHead>
-                      <TableHead className="text-right">Valor Total</TableHead>
+                      
                       <TableHead>Estado</TableHead>
                       <TableHead>Fecha Entrega</TableHead>
                       <TableHead className="text-right">Acciones</TableHead>
@@ -288,9 +288,7 @@ export default function ProviderDashboard() {
                       <TableRow key={order.consecutivo} className={isOrderLate(order) ? "bg-red-50" : ""}>
                         <TableCell className="font-medium">{order.consecutivo}</TableCell>
                         <TableCell>{format(new Date(order.fecha), "dd/MM/yyyy")}</TableCell>
-                        <TableCell className="text-right font-semibold">
-                          ${parseFloat(order.valorTotal).toLocaleString("es-CO")}
-                        </TableCell>
+                     
                         <TableCell>{getStatusBadge(order.estadoOrden)}</TableCell>
                         <TableCell>
                           {order.fechaEstimadaEntrega ? (
