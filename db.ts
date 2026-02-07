@@ -138,9 +138,27 @@ export async function getProviderOrders(providerId: number, limit = 50, offset =
   if (!db) return [];
 
   return await db
-    .select()
+    .select({
+      // Seleccionamos los campos de la cabecera
+      id: purchaseOrders.id,
+      consecutivo: purchaseOrders.consecutivo,
+      fecha: purchaseOrders.fecha,
+      estadoOrden: purchaseOrders.estadoOrden,
+      notificadoWpp: purchaseOrders.notificadoWpp,
+      referencia: purchaseOrders.referencia,
+      descripcion: purchaseOrders.descripcion,
+      
+      // >>> LA MAGIA ESTÁ AQUÍ <<<
+      // Sumamos el valorTotal de la tabla orderItems en tiempo real
+      valorTotal: sql<string>`COALESCE(SUM(CAST(${orderItems.valorTotal} AS DECIMAL(15,2))), 0)`,
+      impuestos: sql<string>`COALESCE(SUM(CAST(${orderItems.impuestos} AS DECIMAL(15,2))), 0)`,
+    })
     .from(purchaseOrders)
+    // Unimos la cabecera con sus ítems
+    .leftJoin(orderItems, eq(purchaseOrders.id, orderItems.purchaseOrderId))
     .where(eq(purchaseOrders.providerId, providerId))
+    // Agrupamos por el ID de la orden para que la suma sea individual
+    .groupBy(purchaseOrders.id)
     .orderBy(desc(purchaseOrders.fecha))
     .limit(limit)
     .offset(offset);
