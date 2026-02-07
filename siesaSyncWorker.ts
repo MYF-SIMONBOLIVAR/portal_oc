@@ -64,7 +64,11 @@ export async function syncSiesaOrders() {
         const fechaAproba = fechaAprobaStr ? new Date(fechaAprobaStr) : new Date(0);
 
         // Salta si la orden es más antigua que la última sincronización
-        if (fechaAproba <= lastSyncDate) continue;
+        //if (fechaAproba <= lastSyncDate) continue;
+        const dosDiasAtras = new Date();
+        dosDiasAtras.setDate(dosDiasAtras.getDate() - 2);
+        
+        if (fechaAproba <= dosDiasAtras) continue;
 
         // --- BUSCAR O CREAR PROVEEDOR ---
         let providerResult = await db.select().from(providers).where(eq(providers.nit, firstItem.f200_nit_prov)).limit(1);
