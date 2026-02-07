@@ -144,19 +144,25 @@ export async function syncSiesaOrders() {
         }
 
         // --- RECALCULAR TOTALES ---
-        const currentItems = await db.select().from(orderItems).where(eq(orderItems.purchaseOrderId, orderId));
-        
-        const total = currentItems.reduce((sum, i) => sum + parseFloat(i.valorTotal || "0"), 0);
-        const impuestos = currentItems.reduce((sum, i) => sum + parseFloat(i.impuestos || "0"), 0);
-        const subtotal = total - impuestos;
+        // 1. Buscamos todos los ítems actuales de esta orden en la DB
+        const currentItems = await db.select().from(orderItems)
+            .where(eq(orderItems.purchaseOrderId, orderId));
 
+        console.log(`🔍 Recalculando OC ${orderId}: Encontrados ${currentItems.length} ítems.`);
+
+        // 2. Sumamos los valores de los 21 ítems (o los que haya)
+        const sumaTotal = currentItems.reduce((sum, i) => sum + (parseFloat(i.valorTotal || "0")), 0);
+        const sumaImpuestos = currentItems.reduce((sum, i) => sum + (parseFloat(i.impuestos || "0")), 0);
+
+        // 3. ACTUALIZAR LA CABECERA (Esto es lo que cambia el valor en el Dashboard)
         await db.update(purchaseOrders)
-          .set({ 
-            valorTotal: String(total.toFixed(2)),
-            subtotal: String(subtotal.toFixed(2)),
-            impuestos: String(impuestos.toFixed(2)) 
-          })
-          .where(eq(purchaseOrders.id, orderId));
+            .set({ 
+                valorTotal: String(sumaTotal.toFixed(2)),
+                impuestos: String(sumaImpuestos.toFixed(2))
+            })
+            .where(eq(purchaseOrders.id, orderId));
+        
+        // ==========================================================
 
       } catch (err) {
         console.error(`[SiesaSyncWorker] Error procesando orden ${key}:`, err);
