@@ -275,7 +275,7 @@ export default function ProviderDashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tipo Documento</TableHead>
+                      
                       <TableHead>Consecutivo</TableHead>
                       <TableHead>Fecha</TableHead>
                       
