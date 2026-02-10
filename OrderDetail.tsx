@@ -183,7 +183,7 @@ export default function OrderDetail() {
                   <div>
                     <CardTitle className="text-2xl font-black text-slate-900 flex items-center gap-2">
                       <Package className="text-blue-600 w-8 h-8" />
-                      Orden # {currentConsecutivo}
+                      ORDEN DE COMPRA {currentConsecutivo}
                     </CardTitle>
                     <CardDescription>{order.referencia || "Desglose de productos asociados a este consecutivo"}</CardDescription>
                   </div>
@@ -197,6 +197,13 @@ export default function OrderDetail() {
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
                 <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-600">MUELLES Y FRENOS SIMON BOLIVAR S.A.S</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600">Nit</p>
+                    <p className="font-semibold">{order.dir || "900296641"}</p>
+                  </div>
                   <div>
                     <p className="text-sm text-slate-600">Fecha</p>
                     <p className="font-semibold">{order.fecha ? format(new Date(order.fecha), "dd/MM/yyyy") : "N/A"}</p>
@@ -275,7 +282,12 @@ export default function OrderDetail() {
                             $ { (Number(item.cantidad || 0) * Number(item.precioUnitario || 0)).toLocaleString("es-CO") }
                           </TableCell>
                           <TableCell className="text-right text-orange-600 font-medium">
-                            ${Number(item.impuestos || 0).toLocaleString("es-CO")}
+                            ${(
+                              Number(item.cantidad || 0) * Number(item.precioUnitario || 0) * 0.19
+                            ).toLocaleString("es-CO", {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0
+                            })}
                           </TableCell>
                           <TableCell className="text-right font-bold pr-6 text-slate-900">
                             ${Number(item.valorTotal || 0).toLocaleString("es-CO")}
