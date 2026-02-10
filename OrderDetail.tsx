@@ -9,7 +9,7 @@ import { Input } from "./input";
 import { ArrowLeft, FileText, Clock, CheckCircle, AlertCircle, AlertTriangle, CheckCircle2, Package, Hash, DollarSign, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { trpc } from "./trpc";
-import { generateOrderPDF } from "@/utils/generatePdf";
+import { generateOrderPDF } from "./generatePdf";
 
 export default function OrderDetail() {
   const [, setLocation] = useLocation();
