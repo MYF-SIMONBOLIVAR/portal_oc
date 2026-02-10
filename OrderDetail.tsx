@@ -9,6 +9,7 @@ import { Input } from "./input";
 import { ArrowLeft, FileText, Clock, CheckCircle, AlertCircle, AlertTriangle, CheckCircle2, Package, Hash, DollarSign, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { trpc } from "./trpc";
+import { generateOrderPDF } from "@/utils/generatePdf";
 
 export default function OrderDetail() {
   const [, setLocation] = useLocation();
@@ -338,6 +339,14 @@ export default function OrderDetail() {
             </CardContent>
           </Card>
           {/* FIN CARD PRODUCTOS */}
+            
+          <Button 
+            onClick={() => generateOrderPDF(order, items)}
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Descargar PDF
+          </Button>
 
             <Card>
               <CardHeader>
