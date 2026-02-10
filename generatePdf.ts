@@ -13,14 +13,11 @@ export const generateOrderPDF = (order: any, items: any[]) => {
   doc.addImage(logoBase64, 'PNG', 14, 5, 40, 10); 
 
   // --- El resto del encabezado baja un poco para no chocar con el logo ---
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("MUELLES Y FRENOS SIMON BOLIVAR S.A.S", 14, 20);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("NIT: 900296641", 14, 20); [cite: 2]
-  doc.text("CL 31 41 15 LC 6 P 2", 14, 25); [cite: 3]
-  doc.text("Tel: 44447232   ITAGÜÍ", 14, 30); [cite: 3]
+  doc.text("NIT: 900296641", 14, 20); 
+  doc.text("CL 31 41 15 LC 6 P 2", 14, 25); 
+  doc.text("Tel: 44447232   ITAGÜÍ", 14, 30);
 
   // --- ENCABEZADO DERECHO (TÍTULO ORDEN) ---
   doc.setFont("helvetica", "bold");
