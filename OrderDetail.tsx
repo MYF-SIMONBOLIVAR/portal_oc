@@ -206,6 +206,14 @@ export default function OrderDetail() {
                     <p className="font-semibold">{order.ciudad || "N/A"}</p>
                   </div>
                   <div>
+                    <p className="text-sm text-slate-600">Dirección</p>
+                    <p className="font-semibold">{order.dir || "CL 30 40 - 10"}</p>
+                  </div>
+                   <div>
+                    <p className="text-sm text-slate-600">Tel</p>
+                    <p className="font-semibold">{order.tel || "44447232"}</p>
+                  </div>
+                  <div>
                     <p className="text-sm text-slate-600">Fecha de Entrega Estimada</p>
                     <p className="font-semibold">{order.fechaEstimadaEntrega ? format(new Date(order.fechaEstimadaEntrega), "dd/MM/yyyy") : "No especificada"}</p>
                   </div>
@@ -217,6 +225,10 @@ export default function OrderDetail() {
                 <div>
                   <p className="text-sm text-slate-600">Notas</p>
                   <p className="font-semibold">{order.notas || "Sin notas"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Facturación</p>
+                  <p className="font-semibold">{order.fac || " Enviar factura de venta electrónica al correo : recepcion@repuestossimonbolivar.com"}</p>
                 </div>
               </CardContent>
             </Card>
@@ -259,8 +271,8 @@ export default function OrderDetail() {
                           <TableCell className="text-right text-slate-600">
                             ${Number(item.precioUnitario || 0).toLocaleString("es-CO")}
                           </TableCell>
-                          <TableCell className="text-right text-slate-600 font-medium">
-                            ${Number(item.valorBruto || 0).toLocaleString("es-CO")}
+                          <TableCell className="text-right font-medium">
+                            $ { (Number(item.cantidad || 0) * Number(item.precioUnitario || 0)).toLocaleString("es-CO") }
                           </TableCell>
                           <TableCell className="text-right text-orange-600 font-medium">
                             ${Number(item.impuestos || 0).toLocaleString("es-CO")}
