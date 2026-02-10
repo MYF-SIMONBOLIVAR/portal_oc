@@ -45,53 +45,93 @@ interface Order {
 
 export const generateOrderPDF = (order: Order) => {
   const doc = new jsPDF();
-
-  const pageWidth = doc.internal.pageSize.getWidth();
   const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
   const margin = 10;
+  const contentWidth = pageWidth - 2 * margin;
   let yPosition = margin;
 
-  const centerX = pageWidth / 2;
-
   // ============ ENCABEZADO ============
-
-  // --- LOGO CENTRADO Y MÁS GRANDE ---
-  const logoWidth = 60;   
-  const logoHeight = 30;  
-  const logoX = (pageWidth - logoWidth) / 2;
-
-  doc.addImage(
-    order.supplier.logo, // base64 o imagen
-    'PNG',               // o 'JPEG'
-    logoX,
-    yPosition,
-    logoWidth,
-    logoHeight
-  );
-
-  yPosition += logoHeight + 5;
-
-  // --- DATOS DE LA EMPRESA (CENTRADOS) ---
+  
+  // Logo y datos de la empresa (lado izquierdo)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text(order.supplier.name, centerX, yPosition, { align: 'center' });
-
+  doc.text(order.supplier.name, margin, yPosition);
+  
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
+  yPosition += 8;
+  doc.text(`NIT: ${order.supplier.nit}`, margin, yPosition);
+  
+  yPosition += 5;
+  doc.text(order.supplier.address, margin, yPosition);
+  
+  yPosition += 5;
+  doc.text(`Tel: ${order.supplier.phone} Fax:`, margin, yPosition);
+  
+  yPosition += 5;
+  doc.text(order.supplier.email, margin, yPosition);
+
+  // Título ORDEN DE COMPRA (lado derecho)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  const titleX = pageWidth - margin - 50;
+  doc.text('ORDEN DE COMPRA', titleX, margin + 5);
+
+  // Número de orden (lado derecho)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`No. ${order.orderNumber}`, titleX, margin + 15);
+
+  yPosition += 15;
+
+  // ============ SECCIÓN PROVEEDOR Y DATOS DE ENTREGA ============
+  
+  // Caja de Proveedor
+  doc.setDrawColor(0);
+  doc.rect(margin, yPosition, contentWidth / 2 - 2, 35);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('Proveedor', margin + 2, yPosition + 4);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`NIT: ${order.buyer.nit}`, margin + 2, yPosition + 10);
+  doc.text(`Proveedor: ${order.buyer.name}`, margin + 2, yPosition + 16);
+  doc.text(`Comprador: ${order.buyer.contact}`, margin + 2, yPosition + 22);
+
+  // Caja de Datos de Entrega
+  const deliveryX = margin + contentWidth / 2;
+  doc.rect(deliveryX, yPosition, contentWidth / 2 - 2, 35);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('Datos de entrega', deliveryX + 2, yPosition + 4);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`Fecha: ${order.deliveryInfo.date}`, deliveryX + 2, yPosition + 10);
+  doc.text(`Dirección: ${order.deliveryInfo.address}`, deliveryX + 2, yPosition + 16);
+  doc.text(`Ciudad: ${order.deliveryInfo.city}`, deliveryX + 2, yPosition + 22);
+
+  yPosition += 40;
+
+  // ============ SECCIÓN FACTURACIÓN ============
+  
+  doc.setDrawColor(0);
+  doc.rect(margin, yPosition, contentWidth, 8);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Facturación', margin + 2, yPosition + 5);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  yPosition += 8;
+  doc.text(`Enviar factura de venta electrónica al correo: ${order.supplier.email}`, margin + 2, yPosition + 2);
 
   yPosition += 8;
-  doc.text(`NIT: ${order.supplier.nit}`, centerX, yPosition, { align: 'center' });
-
-  yPosition += 5;
-  doc.text(order.supplier.address, centerX, yPosition, { align: 'center' });
-
-  yPosition += 5;
-  doc.text(`Tel: ${order.supplier.phone} Fax:`, centerX, yPosition, { align: 'center' });
-
-  yPosition += 5;
-  doc.text(order.supplier.email, centerX, yPosition, { align: 'center' });
-};
-
 
   // ============ TABLA DE ITEMS ============
   
@@ -208,3 +248,10 @@ export const generateOrderPDF = (order: Order) => {
 
   return doc;
 };
+
+// Función auxiliar para generar PDF y descargarlo
+export const downloadOrderPDF = (order: Order, filename: string = 'orden_compra.pdf') => {
+  const doc = generateOrderPDF(order);
+  doc.save(filename);
+};
+
