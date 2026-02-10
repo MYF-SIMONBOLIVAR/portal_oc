@@ -183,7 +183,7 @@ export default function OrderDetail() {
                   <div>
                     <CardTitle className="text-2xl font-black text-slate-900 flex items-center gap-2">
                       <Package className="text-blue-600 w-8 h-8" />
-                      ORDEN DE COMPRA {currentConsecutivo}
+                      ORDEN DE COMPRA # {currentConsecutivo}
                     </CardTitle>
                     <CardDescription>{order.referencia || "Desglose de productos asociados a este consecutivo"}</CardDescription>
                   </div>
@@ -198,7 +198,8 @@ export default function OrderDetail() {
               <CardContent className="space-y-4 pt-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-slate-600">MUELLES Y FRENOS SIMON BOLIVAR S.A.S</p>
+                    <p className="text-sm text-slate-600">Empresa</p>
+                    <p className="font-semibold">{order.dir || "MUELLES Y FRENOS SIMON BOLIVAR S.A.S"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-600">Nit</p>
@@ -210,7 +211,7 @@ export default function OrderDetail() {
                   </div>
                   <div>
                     <p className="text-sm text-slate-600">Ciudad</p>
-                    <p className="font-semibold">{order.ciudad || "N/A"}</p>
+                    <p className="font-semibold">{order.ciudad || "ITAGÜÍ"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-600">Dirección</p>
@@ -300,19 +301,26 @@ export default function OrderDetail() {
               )}
               
               {items.length > 0 && (
-                <div className="p-8 bg-white border-t border-slate-100 flex flex-col items-end gap-1">
-                  <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm">
-                    <span>Total Bruto:</span>
-                    <span className="font-medium text-slate-700">
-                      ${items.reduce((acc: number, item: any) => acc + Number(item.valorBruto || 0), 0).toLocaleString("es-CO")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm">
-                    <span>Total Impuestos:</span>
-                    <span className="font-medium text-orange-600">
-                      + ${items.reduce((acc: number, item: any) => acc + Number(item.impuestos || 0), 0).toLocaleString("es-CO")}
-                    </span>
-                  </div>
+              <div className="p-8 bg-white border-t border-slate-100 flex flex-col items-end gap-1">
+                {/* Cálculo de Total Bruto (Suma de Cantidad * Precio) */}
+                <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm">
+                  <span>Total Bruto:</span>
+                  <span className="font-medium text-slate-700">
+                    ${items.reduce((acc: number, item: any) => 
+                      acc + (Number(item.cantidad || 0) * Number(item.precioUnitario || 0)), 0
+                    ).toLocaleString("es-CO")}
+                  </span>
+                </div>
+              
+                {/* Cálculo de Total Impuestos (19% del Bruto calculado arriba) */}
+                <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm">
+                  <span>Total Impuestos (19%):</span>
+                  <span className="font-medium text-orange-600">
+                    + ${items.reduce((acc: number, item: any) => 
+                      acc + (Number(item.cantidad || 0) * Number(item.precioUnitario || 0) * 0.19), 0
+                    ).toLocaleString("es-CO")}
+                  </span>
+                </div>
                   <div className="flex justify-between w-full max-w-[280px] text-slate-500 text-sm border-b border-slate-100 pb-3 mb-1">
                     <span>Dscto Global:</span>
                     <span className="font-medium text-green-600">
