@@ -47,6 +47,7 @@ export const generateOrderPDF = (order: Order) => {
   const doc = new jsPDF();
 
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageWidth = doc.internal.pageSize.width;
   const margin = 10;
   let yPosition = margin;
 
