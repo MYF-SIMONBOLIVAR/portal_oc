@@ -46,7 +46,7 @@ interface Order {
 export const generateOrderPDF = (order: Order) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
-  const pageHeight = doc.internal.pageSize.height;
+  
   const margin = 10;
   const contentWidth = pageWidth - 2 * margin;
   let yPosition = margin;
