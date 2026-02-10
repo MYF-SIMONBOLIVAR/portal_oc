@@ -10,6 +10,7 @@ import { ArrowLeft, FileText, Clock, CheckCircle, AlertCircle, AlertTriangle, Ch
 import { format } from "date-fns";
 import { trpc } from "./trpc";
 import { generateOrderPDF } from "./generatePdf";
+import { Download, Package } from "lucide-react";
 
 export default function OrderDetail() {
   const [, setLocation] = useLocation();
