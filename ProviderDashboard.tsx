@@ -272,37 +272,60 @@ export default function ProviderDashboard() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      
-                      <TableHead>Consecutivo</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Fecha Entrega</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredOrders.map((order: any) => (
-                      <TableRow key={order.consecutivo} className={isOrderLate(order) ? "bg-red-50" : ""}>
-                        <TableCell className="font-medium">{order.consecutivo}</TableCell>
-                        <TableCell>{format(new Date(order.fecha), "dd/MM/yyyy")}</TableCell>
-                     
-                        <TableCell>{getStatusBadge(order.estadoOrden)}</TableCell>
-                        <TableCell>
-                          {order.fechaEstimadaEntrega ? (
-                            <div className="flex items-center gap-2">
-                              <span>{format(new Date(order.fechaEstimadaEntrega), "dd/MM/yyyy")}</span>
-                              {isOrderLate(order) && (
-                                <Badge className="bg-red-100 text-red-800">Atrasada</Badge>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-slate-400">Sin fecha</span>
-                          )}
-                        </TableCell>
+               <Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Consecutivo</TableHead>
+      <TableHead>Fecha</TableHead>
+      {/* Nuevos encabezados */}
+      <TableHead>No. Guía</TableHead>
+      <TableHead>No. Factura</TableHead>
+      
+      <TableHead>Estado</TableHead>
+      <TableHead>Fecha Entrega</TableHead>
+      <TableHead className="text-right">Acciones</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {filteredOrders.map((order: any) => (
+      <TableRow key={order.consecutivo} className={isOrderLate(order) ? "bg-red-50" : ""}>
+        <TableCell className="font-medium">{order.consecutivo}</TableCell>
+        <TableCell>{format(new Date(order.fecha), "dd/MM/yyyy")}</TableCell>
+        
+        {/* Nuevas celdas con validación para mostrar "---" si están vacíos */}
+        <TableCell>
+          {order.numeroGuia ? (
+            <span className="font-mono text-sm bg-slate-100 px-2 py-1 rounded">
+              {order.numeroGuia}
+            </span>
+          ) : (
+            <span className="text-slate-400 italic text-xs">Pendiente</span>
+          )}
+        </TableCell>
+        
+        <TableCell>
+          {order.numeroFactura ? (
+            <span className="font-medium text-slate-700">
+              {order.numeroFactura}
+            </span>
+          ) : (
+            <span className="text-slate-400 italic text-xs">Sin factura</span>
+          )}
+        </TableCell>
+
+        <TableCell>{getStatusBadge(order.estadoOrden)}</TableCell>
+        <TableCell>
+          {order.fechaEstimadaEntrega ? (
+            <div className="flex items-center gap-2">
+              <span>{format(new Date(order.fechaEstimadaEntrega), "dd/MM/yyyy")}</span>
+              {isOrderLate(order) && (
+                <Badge className="bg-red-100 text-red-800">Atrasada</Badge>
+              )}
+            </div>
+          ) : (
+            <span className="text-slate-400">Sin fecha</span>
+          )}
+        </TableCell>
                         <TableCell className="text-right space-x-2">
                           {order.estadoOrden === "pendiente" && (
                             <>
