@@ -98,10 +98,9 @@ export async function syncSiesaOrders() {
 
         let orderId: number;
 
-        if (existingOrder.length === 0) {
-          // CASO A: CREAR CABECERA
-          const [orderRes] = await db.insert(purchaseOrders).values({
-            providerId,
+       if (existingOrder.length === 0) {
+      const [orderRes] = await db.insert(purchaseOrders).values({
+            providerId: providerId, //  USA LA VARIABLE providerId, NO EL NIT
             siesaId: (firstItem as any).f420_id_interno?.toString().trim() || null,
             consecutivo: firstItem.f420_consec_docto,
             fecha: new Date(firstItem.f420_fecha),
