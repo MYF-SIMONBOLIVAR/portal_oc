@@ -25,13 +25,13 @@ export const generateOrderPDF = (order: any, items: any[]) => {
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text("MUELLES Y FRENOS SIMON BOLIVAR S.A.S", centerX, 35, { align: 'center' });
+  doc.text("MUELLES Y FRENOS SIMON BOLIVAR S.A.S", centerX, 45, { align: 'center' });
   
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("NIT: 900296641", centerX, 40, { align: 'center' }); 
-  doc.text("CL 31 41 15 LC 6 P 2", centerX, 45, { align: 'center' }); 
-  doc.text("Tel: 44447232   ITAGÜÍ", centerX, 50, { align: 'center' });
+  doc.text("NIT: 900296641", centerX, 50, { align: 'center' }); 
+  doc.text("CL 31 41 15 LC 6 P 2", centerX, 55, { align: 'center' }); 
+  doc.text("Tel: 44447232   ITAGÜÍ", centerX, 60, { align: 'center' });
 
   // --- ENCABEZADO DERECHO ---
   doc.setFont("helvetica", "bold");
@@ -44,8 +44,8 @@ export const generateOrderPDF = (order: any, items: any[]) => {
 
   // --- BLOQUE: DATOS DE ENTREGA Y PROVEEDOR ---
 
-  const blockY = 95;
-  doc.setDrawColor(230);
+  const blockY = 105;
+  doc.setDrawColor(250);
   doc.rect(14, 45, (pageWidth / 2) - 16, 25); 
   doc.rect((pageWidth / 2) + 2, 45, (pageWidth / 2) - 16, 25); 
 
