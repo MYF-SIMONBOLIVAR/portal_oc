@@ -44,23 +44,23 @@ export const generateOrderPDF = (order: any, items: any[]) => {
 
   // --- BLOQUE: DATOS DE ENTREGA Y PROVEEDOR ---
 
-  const blockY = 105;
-  doc.setDrawColor(250);
-  doc.rect(14, 45, (pageWidth / 2) - 16, 25); 
-  doc.rect((pageWidth / 2) + 2, 45, (pageWidth / 2) - 16, 25); 
+//  const blockY = 105;
+//doc.setDrawColor(250);
+//doc.rect(14, 45, (pageWidth / 2) - 16, 25); 
+//doc.rect((pageWidth / 2) + 2, 45, (pageWidth / 2) - 16, 25); 
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("Datos de entrega", 16, 50); 
-  doc.text("Proveedor", (pageWidth / 2) + 4, 50); 
+  //doc.setFont("helvetica", "bold");
+  //doc.setFontSize(9);
+  //doc.text("Datos de entrega", 16, 50); 
+  //doc.text("Proveedor", (pageWidth / 2) + 4, 50); 
   
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text(`Fecha: ${order.fecha ? format(new Date(order.fecha), "dd/MM/yyyy") : "N/A"}`, 16, 55); 
-  doc.text(`Dirección: CL 30 40-10`, 16, 60); 
-  doc.text(`Ciudad: ITAGÜÍ`, 16, 65); 
-  doc.text(`NIT: ${order.providerNit || 'N/A'}`, (pageWidth / 2) + 4, 55); 
-  doc.text(`Proveedor: ${order.providerName || 'N/A'}`, (pageWidth / 2) + 4, 60, { maxWidth: 80 }); 
+  //doc.setFont("helvetica", "normal");
+  //doc.setFontSize(8);
+  //doc.text(`Fecha: ${order.fecha ? format(new Date(order.fecha), "dd/MM/yyyy") : "N/A"}`, 16, 55); 
+  //doc.text(`Dirección: CL 30 40-10`, 16, 60); 
+  //doc.text(`Ciudad: ITAGÜÍ`, 16, 65); 
+  //doc.text(`NIT: ${order.providerNit || 'N/A'}`, (pageWidth / 2) + 4, 55); 
+  //doc.text(`Proveedor: ${order.providerName || 'N/A'}`, (pageWidth / 2) + 4, 60, { maxWidth: 80 }); 
 
   // --- TABLA DE PRODUCTOS ---
   const tableRows = items.map((item) => {
