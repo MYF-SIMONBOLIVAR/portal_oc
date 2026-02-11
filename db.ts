@@ -197,7 +197,19 @@ export async function getOrderById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
 
-  const result = await db.select().from(purchaseOrders).where(eq(purchaseOrders.id, id)).limit(1);
+  const result = await db
+    .select({
+      id: purchaseOrders.id,
+      consecutivo: purchaseOrders.consecutivo,
+      fecha: purchaseOrders.fecha, // <--- Solo agrega esta línea
+      estadoOrden: purchaseOrders.estadoOrden,
+      valorTotal: purchaseOrders.valorTotal,
+      providerId: purchaseOrders.providerId,
+    })
+    .from(purchaseOrders)
+    .where(eq(purchaseOrders.id, id))
+    .limit(1);
+
   return result.length > 0 ? result[0] : undefined;
 }
 
