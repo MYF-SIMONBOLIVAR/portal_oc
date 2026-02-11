@@ -345,7 +345,7 @@ export const appRouter = router({
           await sendConfirmationNotification({
             consecutivo: order.consecutivo,
             proveedor: provider.razonSocial,
-            url: "http://repuestossimonbolivar.com",
+            url: "https://portal-oc.onrender.com/",
             celular: "3506325984" // Número compras fijo
           });
           console.log(`[WhatsApp] Notificación enviada para la orden ${order.consecutivo}`);
