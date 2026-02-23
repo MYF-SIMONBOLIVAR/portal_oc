@@ -49,7 +49,7 @@ export const purchaseOrders = mysqlTable("purchaseOrders", {
   // FIX: .nullable() antes de .unique() para evitar conflictos de tipos y duplicados vacíos
   
   siesaId: varchar("siesa_id", { length: 255 }).unique(),
-  providerId: int("providerId").notNull(),
+  providerId: varchar("providerId", { length: 20 }).notNull(),
   tipoDocumento: varchar("tipoDocumento", { length: 20 }),
   consecutivo: varchar("consecutivo", { length: 50 }).notNull(),
   fecha: date("fecha").notNull(),
