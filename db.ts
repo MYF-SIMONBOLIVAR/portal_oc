@@ -133,14 +133,27 @@ export async function createProvider(data: {
  * PURCHASE ORDER QUERIES
  */
 
-export async function getProviderOrders(providerId: number, limit = 50, offset = 0) {
+export async function getProviderOrders(nit: string, limit = 50, offset = 0) {
   const db = await getDb();
   if (!db) return [];
 
+  // 1. Buscamos al proveedor por su NIT para obtener su ID numérico real
+  const provider = await db
+    .select({ id: providers.id })
+    .from(providers)
+    .where(eq(providers.nit, nit))
+    .limit(1);
+
+  // Si no existe el proveedor con ese NIT, devolvemos vacío
+  if (provider.length === 0) return [];
+
+  const internalId = provider[0].id;
+
+  // 2. Ahora usamos ese internalId (que sí es un número) para traer las órdenes
   return await db
     .select()
     .from(purchaseOrders)
-    .where(eq(purchaseOrders.providerId, providerId))
+    .where(eq(purchaseOrders.providerId, internalId))
     .orderBy(desc(purchaseOrders.fecha))
     .limit(limit)
     .offset(offset);
