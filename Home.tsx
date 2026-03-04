@@ -153,11 +153,17 @@ export default function Home() {
           text-transform: uppercase; letter-spacing: 5px;
           text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.7);
           margin: 0;
+          line-height: 1.1;
         }
 
         .brand-subtitle {
-          font-size: 1.5rem; color: white;
-          letter-spacing: 4px; text-transform: uppercase;
+          font-size: 1.5rem;
+          color: white;
+          font-weight: 500;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+          margin-top: 0.5rem;
         }
 
         .login-card {
