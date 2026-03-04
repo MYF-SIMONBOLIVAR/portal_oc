@@ -45,24 +45,78 @@ export default function Home() {
     loginMutation.mutate({ nit, password });
   };
 
+  Aquí tienes el archivo completo, unificando la lógica de tRPC, el diseño de cristal (glassmorphism) y la corrección de las capas (z-index) para que el formulario flote correctamente sobre "la mula".
+
+TypeScript
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { AlertCircle } from "lucide-react";
+import { trpc } from "./trpc";
+
+export default function Home() {
+  const [, setLocation] = useLocation();
+
+  // Estados de Login
+  const [nit, setNit] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+
+  const loginMutation = trpc.provider.login.useMutation({
+    onSuccess: (data: any) => {
+      // Guardar sesión
+      localStorage.setItem("providerToken", data.token);
+      localStorage.setItem("providerId", data.provider.id.toString());
+      localStorage.setItem("providerNit", data.provider.nit);
+      localStorage.setItem("userRole", data.provider.role || "provider");
+
+      // Redirección por rol
+      if (data.provider.role === 'admin') {
+        setLocation("/admin/dashboard");
+      } else {
+        setLocation("/provider/dashboard");
+      }
+    },
+    onError: (err: any) => {
+      setLoginError(err.message || "Error al iniciar sesión");
+      setIsLoginLoading(false);
+    },
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    setIsLoginLoading(true);
+
+    if (!nit.trim() || !password.trim()) {
+      setLoginError("Por favor completa todos los campos");
+      setIsLoginLoading(false);
+      return;
+    }
+
+    loginMutation.mutate({ nit, password });
+  };
+
   return (
-     <div className="login-wrapper">
-    {/* El source NO debe decir "public/", solo "/nombre-del-archivo" */}
-    <video className="video-background" autoPlay muted loop playsinline>
-      <source src="/fondo-mula.mp4" type="video/mp4" />
-    </video>
+    <div className="login-wrapper">
+      {/* 1. Fondo de Video (Z-INDEX 1) */}
+      <video className="video-background" autoPlay muted loop playsInline>
+        <source src="/fondo-mula.mp4" type="video/mp4" />
+      </video>
       
-      {/* 2. Overlay Gradiente */}
+      {/* 2. Overlay Oscuro (Z-INDEX 2) */}
       <div className="overlay-dark"></div>
 
+      {/* 3. Contenedor de Contenido (Z-INDEX 3) */}
       <div className="login-container">
-        {/* 3. Branding Section */}
+        
+        {/* Branding Section */}
         <div className="brand-section">
           <h1 className="brand-title">PORTAL PROVEEDORES</h1>
           <p className="brand-subtitle">Repuestos SIMÓN BOLÍVAR</p>
         </div>
 
-        {/* 4. Glassmorphism Card */}
+        {/* Glassmorphism Card */}
         <div className="login-card">
           <div className="form-title">
             <h2>Bienvenido</h2>
@@ -111,26 +165,31 @@ export default function Home() {
           </form>
         </div>
 
-        {/* 5. Footer */}
+        {/* Footer */}
         <div className="login-footer">
           <p>© 2026 Repuestos Simón Bolívar | Todos los derechos reservados</p>
         </div>
       </div>
 
-      {/* Estilos embebidos para mantener la fidelidad del diseño original */}
+      {/* Estilos CSS Inyectados */}
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.cdnfonts.com/css/futura-pt');
 
-        .login-wrapper {
+       /* 1. La base de todo */
+.login-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0; /* Capa base */
   overflow: hidden;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* 2. El video al fondo del todo */
 .video-background {
   position: absolute;
   top: 50%;
@@ -139,27 +198,34 @@ export default function Home() {
   min-height: 100%;
   width: auto;
   height: auto;
-  transform: translate(-50%, -50%); /* Centra el video sin importar el tamaño */
+  transform: translate(-50%, -50%);
   object-fit: cover;
-  z-index: 1; /* Por encima del wrapper */
+  z-index: 1; /* Capa más baja */
 }
 
+/* 3. El oscurecedor para que se lea el texto */
 .overlay-dark {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(25, 40, 127, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
-  z-index: 2; /* Por encima del video */
+  background: linear-gradient(135deg, rgba(25, 40, 127, 0.6) 0%, rgba(0, 0, 0, 0.5) 100%);
+  z-index: 2; /* Capa media */
 }
 
+/* 4. El formulario y el título arriba de todo */
 .login-container {
   position: relative;
-  z-index: 3
-          display: flex; flex-direction: column; align-items: center;
-          gap: 2rem; width: 100%; padding: 20px;
-        }
+  z-index: 3; /* Capa más alta */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 20px;
+  gap: 2rem;
+}
 
         .brand-title {
           font-size: clamp(2.5rem, 8vw, 4.5rem);
