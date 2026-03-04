@@ -46,11 +46,11 @@ export default function Home() {
   };
 
   return (
-    <div className="login-wrapper">
-      {/* 1. Video Background */}
-      <video className="video-background" autoPlay muted loop playsInline>
-        <source src="/fondo-mula.mp4" type="video/mp4" />
-      </video>
+     <div className="login-wrapper">
+    {/* El source NO debe decir "public/", solo "/nombre-del-archivo" */}
+    <video className="video-background" autoPlay muted loop playsinline>
+      <source src="/fondo-mula.mp4" type="video/mp4" />
+    </video>
       
       {/* 2. Overlay Gradiente */}
       <div className="overlay-dark"></div>
@@ -122,27 +122,41 @@ export default function Home() {
         @import url('https://fonts.cdnfonts.com/css/futura-pt');
 
         .login-wrapper {
-          position: fixed;
-          top: 0; left: 0; width: 100%; height: 100%;
-          display: flex; align-items: center; justify-content: center;
-          overflow: hidden; font-family: 'Futura PT', sans-serif;
-        }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Capa base */
+  overflow: hidden;
+}
 
-        .video-background {
-          position: absolute;
-          top: 0; left: 0; width: 100%; height: 100%;
-          object-fit: cover; z-index: 1;
-        }
+.video-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%); /* Centra el video sin importar el tamaño */
+  object-fit: cover;
+  z-index: 1; /* Por encima del wrapper */
+}
 
-        .overlay-dark {
-          position: absolute;
-          top: 0; left: 0; width: 100%; height: 100%;
-          background: linear-gradient(135deg, rgba(25, 40, 127, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
-          z-index: 2;
-        }
+.overlay-dark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(25, 40, 127, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+  z-index: 2; /* Por encima del video */
+}
 
-        .login-container {
-          position: relative; z-index: 3;
+.login-container {
+  position: relative;
+  z-index: 3
           display: flex; flex-direction: column; align-items: center;
           gap: 2rem; width: 100%; padding: 20px;
         }
