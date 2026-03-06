@@ -108,7 +108,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={isLoginLoading}
-              className="submit-btn"
+             
               className="submit-btn mt-4"
             >
               {isLoginLoading ? "VERIFICANDO..." : "INGRESAR"}
