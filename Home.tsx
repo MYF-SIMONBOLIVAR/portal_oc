@@ -99,7 +99,7 @@ export default function Home() {
             </div>
 
             {loginError && (
-              <div className="error-message flex items-center justify-center gap-2">
+              <div className="error-message mt-4 flex items-center justify-center gap-2">
                 <AlertCircle className="h-5 w-5" />
                 <span>{loginError}</span>
               </div>
@@ -108,8 +108,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={isLoginLoading}
-             
-              className="submit-btn mt-4"
+              className="submit-btn mt-6"
             >
               {isLoginLoading ? "VERIFICANDO..." : "INGRESAR"}
             </button>
