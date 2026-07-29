@@ -7,14 +7,16 @@ export const generateOrderPDF = (order: any, items: any[] = []) => {
   const pageWidth = doc.internal.pageSize.width;
   const centerX = pageWidth / 2;
 
-  // 1. OBTENCIÓN ROBUSTA DEL NÚMERO DE ORDEN / CONSECUTIVO
+// 1. OBTENCIÓN ROBUSTA DEL NÚMERO DE ORDEN / CONSECUTIVO
+const rawOrder = order?.data ?? order?.order ?? order;
+
 const orderNumber = 
-  order?.consecutivo ?? 
-  order?.consecutivoOrden ?? 
-  order?.numeroOrden ?? 
-  order?.orderNumber ?? 
-  order?.numero ?? 
-  order?.id ?? 
+  rawOrder?.consecutivo ?? 
+  rawOrder?.consecutivoOrden ?? 
+  rawOrder?.numeroOrden ?? 
+  rawOrder?.orderNumber ?? 
+  rawOrder?.numero ?? 
+  rawOrder?.id ?? 
   'N/A';
 
   // 1. CONFIGURACIÓN DEL LOGO (SOLO UNA VEZ)
