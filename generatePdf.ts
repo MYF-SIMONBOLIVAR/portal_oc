@@ -2,10 +2,13 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 
-export const generateOrderPDF = (order: any, items: any[]) => {
+export const generateOrderPDF = (order: any, items: any[] = []) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const centerX = pageWidth / 2;
+
+  // 1. OBTENCIÓN ROBUSTA DEL NÚMERO DE ORDEN / CONSECUTIVO
+  const orderNumber = order?.consecutivo ?? order?.numero ?? order?.id ?? 'N/A';
 
   // 1. CONFIGURACIÓN DEL LOGO (SOLO UNA VEZ)
   // Reemplaza el texto de abajo por tu código Base64 largo que empieza con data:image...
@@ -38,9 +41,9 @@ export const generateOrderPDF = (order: any, items: any[]) => {
   doc.setFontSize(12);
   doc.text("ORDEN DE COMPRA", pageWidth - 14, 15, { align: 'right' }); 
   doc.setFontSize(13);
-  doc.setTextColor(220, 38, 38); 
-  doc.text(`No. ${order.consecutivo || 'N/A'}`, pageWidth - 14, 22, { align: 'right' }); 
-  doc.setTextColor(0);
+  doc.setTextColor(220, 38, 38); // Color rojo para el número
+  doc.text(`No. ${orderNumber}`, pageWidth - 14, 22, { align: 'right' }); 
+  doc.setTextColor(0); // Reset a negro
 
   // --- BLOQUE: DATOS DE ENTREGA Y PROVEEDOR ---
 
