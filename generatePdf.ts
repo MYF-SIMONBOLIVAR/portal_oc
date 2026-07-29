@@ -105,5 +105,5 @@ const orderNumber =
   doc.setFont("helvetica", "bold");
   doc.text(`TOTAL A PAGAR: $${totalNeto.toLocaleString("es-CO")}`, pageWidth - 14, finalY, { align: 'right' });
 
-  doc.save(`Orden_Compra_${order.consecutivo}.pdf`);
+  doc.save(`Orden_Compra_${orderNumber}.pdf`);
 };
