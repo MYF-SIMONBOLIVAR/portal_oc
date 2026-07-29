@@ -342,12 +342,15 @@ export default function OrderDetail() {
           {/* FIN CARD PRODUCTOS */}
             
           <Button 
-            onClick={() => generateOrderPDF(order, items)}
-            className="flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Descargar PDF
-          </Button>
+  onClick={() => generateOrderPDF(
+    { ...order, consecutivo: currentConsecutivo }, 
+    items
+  )}
+  className="flex items-center gap-2"
+>
+  <Download className="w-4 h-4" />
+  Descargar PDF
+</Button>
 
             <Card>
               <CardHeader>
