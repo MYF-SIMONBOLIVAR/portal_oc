@@ -8,7 +8,14 @@ export const generateOrderPDF = (order: any, items: any[] = []) => {
   const centerX = pageWidth / 2;
 
   // 1. OBTENCIÓN ROBUSTA DEL NÚMERO DE ORDEN / CONSECUTIVO
-  const orderNumber = order?.consecutivo ?? order?.numero ?? order?.id ?? 'N/A';
+const orderNumber = 
+  order?.consecutivo ?? 
+  order?.consecutivoOrden ?? 
+  order?.numeroOrden ?? 
+  order?.orderNumber ?? 
+  order?.numero ?? 
+  order?.id ?? 
+  'N/A';
 
   // 1. CONFIGURACIÓN DEL LOGO (SOLO UNA VEZ)
   // Reemplaza el texto de abajo por tu código Base64 largo que empieza con data:image...
